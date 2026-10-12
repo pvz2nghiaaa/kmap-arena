@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K-Map Arena — Đấu Trường Bảng Karnaugh &amp; Lũy Thừa 2</title>
+  <meta name="description" content="Ứng dụng học tập và rèn luyện kỹ năng bảng Karnaugh 4 biến (A,B,C,D) và phản xạ lũy thừa bậc 2 (2⁰ đến 2¹⁶) thông qua các trò chơi đua thời gian chuẩn đại học.">
+  
+  <!-- Fonts: Google Fonts (Inter & JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Nền Canvas động: Chữ số nhị phân trôi & Canvas hiệu ứng nổ hạt/confetti -->
+  <canvas id="bg-canvas"></canvas>
+  <canvas id="fx-canvas"></canvas>
+
+  <!-- Thanh Điều Hướng Trên Cùng -->
+  <header class="app-header glass">
+    <div class="brand" onclick="App.go('home')">
+      <div class="brand-icon">K</div>
+      <div>
+        <div class="brand-title">K-MAP ARENA</div>
+      </div>
+      <span class="brand-badge">2ⁿ MASTERY</span>
+    </div>
+
+    <nav class="main-nav">
+      <button type="button" data-tab="home" class="active">
+        <span>🎮</span> <span>Trò Chơi</span>
+      </button>
+      <button type="button" data-tab="sandbox">
+        <span>🧪</span> <span>Phòng Thí Nghiệm</span>
+      </button>
+      <button type="button" data-tab="learn">
+        <span>📚</span> <span>Cẩm Nang</span>
+      </button>
+      <button type="button" data-tab="settings">
+        <span>⚙</span> <span>Cài Đặt</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Khung Ứng Dụng Chính -->
+  <main id="app"></main>
+
+  <!-- Nạp các module theo thứ tự kiến trúc -->
+  <script src="js/util.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/kmap.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
