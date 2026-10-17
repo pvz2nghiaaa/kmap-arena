@@ -84,11 +84,11 @@ const App = (() => {
     const html = `
     <div class="home-view">
       <section class="hero glass glow-hero">
-        <div class="hero-badge"><span class="pulse-dot"></span> Đấu Trường Đại Học · Boolean &amp; 2ⁿ Mastery</div>
-        <h1 class="hero-title">BẢNG KARNAUGH <span class="gradient-text">&amp; LŨY THỪA 2</span></h1>
+        <div class="hero-badge"><span class="pulse-dot"></span> Đấu Trường Đại Học · Boolean, Hệ Thống Số &amp; Kiến Trúc Máy Tính</div>
+        <h1 class="hero-title">K-MAP &amp; <span class="gradient-text">COMPUTER ARCHITECTURE ARENA</span></h1>
         <p class="hero-sub">
-          Luyện phản xạ lập trình mạch số &amp; kiến trúc máy tính qua <b>6 trò chơi đua thời gian</b>. 
-          Rút gọn biểu thức 4 biến \(A,B,C,D\) trên mã Gray, săn Implicant cốt yếu, và thành thạo \(2^0\) đến \(2^{16}\) chớp nhoáng.
+          Luyện phản xạ lập trình mạch số &amp; kiến trúc máy tính qua <b>9 trò chơi đua thời gian chuẩn đại học</b>: 
+          Rút gọn bảng Karnaugh 4 biến \(A,B,C,D\), giải mã 4 hệ biểu diễn số nguyên (Dấu lượng, Bù 1, Bù 2, Excess-K), võ đài thao tác ALU &amp; cờ tràn, và giải mã số chấm động IEEE 754.
         </p>
         <div class="hero-stats">
           <div class="hstat"><small>Lượt đã chơi</small><b>${fmtNum(totalPlayed)}</b></div>
@@ -173,6 +173,11 @@ const App = (() => {
         ${g.levels[savedDiff]}
       </div>
 
+      <div class="gc-meta-badge-row" data-k="meta-row" style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; font-size:0.8rem;">
+        <span class="muted"><i class="mono">⏱</i> Thời gian: <b data-k="time-val">${g.duration(savedDiff)}s</b></span>
+        <span class="pill sm" data-k="score-mult" style="--pc:${DIFF[savedDiff].color}; font-weight:700;">${savedDiff === 0 ? 'Điểm chuẩn (×1.0)' : savedDiff === 1 ? 'Điểm cao (×2.3)' : 'Điểm cực đại (×5.0)'}</span>
+      </div>
+
       <div class="gc-foot">
         <button type="button" class="btn primary start-btn" data-a="start">
           Bắt Đầu Đua ➔
@@ -203,6 +208,15 @@ const App = (() => {
 
         const lvlEl = card.querySelector('[data-k="lvl-desc"]');
         lvlEl.textContent = g.levels[diff];
+
+        const timeValEl = card.querySelector('[data-k="time-val"]');
+        if (timeValEl) timeValEl.textContent = `${g.duration(diff)}s`;
+
+        const scoreMultEl = card.querySelector('[data-k="score-mult"]');
+        if (scoreMultEl) {
+          scoreMultEl.style.setProperty('--pc', DIFF[diff].color);
+          scoreMultEl.textContent = diff === 0 ? 'Điểm chuẩn (×1.0)' : diff === 1 ? 'Điểm cao (×2.3)' : 'Điểm cực đại (×5.0)';
+        }
       };
 
       card.querySelectorAll('.diff-picker .pill').forEach((btn) => {
@@ -633,8 +647,44 @@ const App = (() => {
           </div>
           <p class="small muted mt-2">
             <b>Mẹo nhớ siêu tốc:</b> \(2^{10} = 1024\) (gần 1K), \(2^{16} = 65,536\) (kích thước địa chỉ con trỏ 16-bit huyền thoại). 
-            Muốn tính \(2^{13}\)? Lấy \(2^{10} \\times 2^3 = 1024 \\times 8 = 8192\)!
+            Muốn tính \(2^{13}\)? Lấy \(2^{10} \times 2^3 = 1024 \times 8 = 8192\)!
           </p>
+        </article>
+
+        <article class="learn-card glass">
+          <h3>5. 4 Hệ Biểu Diễn Số Nguyên (SM, 1C, 2C, Excess-K)</h3>
+          <ul class="learn-list">
+            <li><b>Dấu lượng (Sign-Magnitude):</b> MSB là bit dấu (\(0=+, 1=-\)), các bit còn lại là độ lớn. Tồn tại 2 số 0: \(+0\) (0000) và \(-0\) (1000). Dải giá trị: \([-(2^{n-1}-1), +(2^{n-1}-1)]\).</li>
+            <li><b>Bù 1 (1's Complement):</b> Số âm thu được bằng cách đảo toàn bộ bit của số dương. Tồn tại 2 số 0: \(+0\) (0000) và \(-0\) (1111). Dải: \([-(2^{n-1}-1), +(2^{n-1}-1)]\).</li>
+            <li><b>Bù 2 (2's Complement):</b> Số âm = đảo bit \(+ 1\). Chỉ có <b>duy nhất 1 số 0</b> (0000). Có cực trị âm bất đối xứng: chuỗi <code>100...0</code> biểu diễn \(-2^{n-1}\) (ví dụ 4-bit là \(-8\), 8-bit là \(-128\)). Dải: \([-2^{n-1}, +(2^{n-1}-1)]\).</li>
+            <li><b>Excess-K (Mã Lệch):</b> Giá trị thực \(V\) được lưu dưới dạng \(X = V + \text{Bias}\). Luôn là số không âm trong bộ nhớ. Bias thông dụng: \(2^{n-1}\) hoặc \(2^{n-1}-1\) (như Excess-127 trong IEEE 754).</li>
+          </ul>
+        </article>
+
+        <article class="learn-card glass">
+          <h3>6. Võ Đài ALU: Phép Toán, Dịch Bit &amp; Cờ Tràn</h3>
+          <ul class="learn-list">
+            <li><b>SAR vs SHR:</b> 
+              <code>SAR</code> (Shift Arithmetic Right) sao chép bit dấu MSB sang phải (bảo toàn số âm trong Bù 2, tương đương chia nguyên cho 2). 
+              <code>SHR</code> (Shift Logical Right) luôn chèn 0 vào MSB.
+            </li>
+            <li><b>Cờ Tràn Overflow (\(V\)) trong Bù 2:</b> Xảy ra khi cộng 2 số cùng dấu nhưng kết quả mang dấu ngược lại (\(+ \text{ cộng } + \to -\) hoặc \(- \text{ cộng } - \to +\)). Tương đương \(V = C_{in} \oplus C_{out}\) tại bit MSB.</li>
+            <li><b>Quy Tắc End-Around Carry (Bù 1):</b> Khi cộng trong Bù 1, nếu có bit nhớ vượt ngoài MSB (\(C_{out}=1\)), bắt buộc phải <b>cộng dồn bit nhớ đó về lại LSB</b> để có kết quả chính xác!</li>
+          </ul>
+        </article>
+
+        <article class="learn-card glass">
+          <h3>7. Chuẩn Số Chấm Động IEEE 754 &amp; Mini-float</h3>
+          <p>Cấu trúc chia làm 3 trường màu phân biệt: 
+            <span class="fp-bit-strip"><span class="fp-s">Dấu S</span> <span class="fp-e">Số Mũ E</span> <span class="fp-m">Định Trị M</span></span>
+          </p>
+          <ul class="learn-list">
+            <li><b>Số chuẩn (Normalized):</b> \(1 \le E \le \text{Max}-1\). Công thức: \((-1)^S \times 2^{E - \text{Bias}} \times (1.\text{Mantissa})_2\) (bit ẩn bằng 1).</li>
+            <li><b>Số dưới chuẩn (Denormalized):</b> \(E = 0, M \ne 0\). Bit ẩn bằng 0! Công thức: \((-1)^S \times 2^{1 - \text{Bias}} \times (0.\text{Mantissa})_2\). Dùng để xấp xỉ dần về 0 mà không bị tràn dưới đột ngột (gradual underflow).</li>
+            <li><b>Số 0 (\(\pm 0\)):</b> \(E = 0, M = 0\). Có cả \(+0\) và \(-0\).</li>
+            <li><b>Vô cực (\(\pm \infty\)):</b> \(E = \text{Max}, M = 0\).</li>
+            <li><b>NaN (Not a Number):</b> \(E = \text{Max}, M \ne 0\).</li>
+          </ul>
         </article>
       </div>
     </div>`;

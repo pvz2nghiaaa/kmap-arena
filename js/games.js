@@ -302,9 +302,9 @@ const GameSprint = {
   ],
   levels: ['2–3 nhóm, không có X, nhóm kề nhau cơ bản', '3–4 nhóm, cuộn biên & 4 góc, vài ô X', '4–6 nhóm, nhiều X, có PI không cốt yếu — phải chọn phủ tối ưu'],
   variants: [{ id: 'sop', label: 'SOP' }, { id: 'pos', label: 'POS' }, { id: 'mix', label: 'Trộn' }],
-  duration: () => 150, par: [20, 35, 55],
+  duration: (diff) => [120, 160, 200][diff], par: [20, 36, 56],
   create(s) {
-    const L = s.diff, BASE = [100, 180, 300][L], BONUS_T = [4, 6, 9][L];
+    const L = s.diff, BASE = [100, 240, 520][L], BONUS_T = [4, 7, 12][L];
     let map, inp, cur, busy = false;
     const els = {}, recent = [];
     const target = () => (cur.mode === 'sop' ? cur.sop.terms : cur.pos.clauses);
@@ -418,9 +418,9 @@ const GameDecode = {
     '<kbd>Enter</kbd> nộp · Sai: −3s, mất combo',
   ],
   levels: ['3–6 ô, chỉ Σm, không có X', '5–9 ô, có ô X tùy định', 'Có ΠM, X, và trục AB/CD có thể bị hoán đổi!'],
-  duration: () => 100, par: [12, 18, 26],
+  duration: (diff) => [80, 110, 140][diff], par: [12, 20, 30],
   create(s) {
-    const L = s.diff, BASE = [60, 100, 160][L];
+    const L = s.diff, BASE = [60, 150, 320][L];
     let map, cur, busy = false;
     const els = {};
 
@@ -545,9 +545,9 @@ const GameReverse = {
   desc: 'Cho một biểu thức Boolean (không nhất thiết tối giản: có thể là POS, phủ định cả cụm, XOR, lồng ngoặc…). Hãy tô đúng mọi ô làm f = 1. Sau mỗi câu đúng, bạn được xem luôn dạng rút gọn.',
   rules: ['Nhấp hoặc kéo để tô ô 1', '<kbd>Enter</kbd> nộp · Bỏ qua: xem đáp án', 'Sai: −3s, mất combo'],
   levels: ['Tổng 2–3 tích', 'SOP dài hoặc tích các tổng (POS)', 'Lồng nhau: phủ định cụm, XOR, tích-của-tổng…'],
-  duration: () => 120, par: [14, 24, 40],
+  duration: (diff) => [90, 125, 160][diff], par: [14, 25, 42],
   create(s) {
-    const L = s.diff, BASE = [80, 150, 260][L];
+    const L = s.diff, BASE = [80, 190, 420][L];
     let map, cur, busy = false;
     const els = {};
     const qHTML = () => `<span class="expr-math">${KM.astHTML(cur.ast, nt())}</span>`;
@@ -633,9 +633,9 @@ const GameHunter = {
     'Đúng toàn bộ mới được điểm · Sai: −5s và xem giải thích chi tiết',
   ],
   levels: ['4 tích, không có X, phân loại độc lập', '5 tích, có ô X tùy định', '6 tích, nhiều X, nhóm vòng cyclic — tư duy độc lập'],
-  duration: () => 180, par: [30, 40, 55],
+  duration: (diff) => [130, 175, 220][diff], par: [30, 45, 65],
   create(s) {
-    const L = s.diff, BASE = [150, 250, 420][L];
+    const L = s.diff, BASE = [150, 360, 780][L];
     let map, cur, busy = false, reviewing = false, picks = [];
     const els = {};
     const qHTML = () => `Σm(${listStr(cur.on)})${cur.dc ? ` + d(${listStr(cur.dc)})` : ''}`;
@@ -730,9 +730,9 @@ const GameCoords = {
   desc: 'Phản xạ chớp nhoáng: ô sáng lên → chọn chỉ số minterm; hoặc cho chỉ số / mã nhị phân / tích literal → nhấp đúng ô. Combo dài nhân điểm rất mạnh — đây là bài khởi động trước khi đua rút gọn.',
   rules: ['Dạng 1: gõ số trên bàn phím (hoặc nhấp bảng số 0–15)', 'Dạng 2: nhấp vào đúng ô trên bản đồ', 'Sai: −2s, mất combo, ô đúng sẽ được chỉ ra'],
   levels: ['Chỉ số thập phân, trục chuẩn', 'Thêm mã nhị phân ABCD và tích literal', 'Trục AB/CD hoán đổi ngẫu nhiên từng câu'],
-  duration: () => 60, par: [2.5, 3.2, 4.2],
+  duration: (diff) => [50, 65, 85][diff], par: [2.5, 3.8, 5.5],
   create(s) {
-    const L = s.diff, BASE = [25, 40, 60][L];
+    const L = s.diff, BASE = [25, 60, 130][L];
     let map, cur, busy = false, buf = '', bufT = 0;
     const els = {};
     function reprOf(m) {
@@ -825,7 +825,7 @@ const GamePow = {
   desc: 'Thuộc lòng 2⁰ đến 2¹⁶ theo cả hai chiều rồi vận dụng: nhân/chia lũy thừa, hex, nhị phân, phân tích một số thành tổng lũy thừa 2, số bit cần thiết…',
   rules: ['Gõ đáp án rồi <kbd>Enter</kbd> · có thể gõ 65536, 65 536 hay 65.536', 'Câu phân tích: gõ các số mũ cách nhau bởi dấu cách, VD <code>15 9 3</code>', 'Sai: −2s và hiện đáp án'],
   levels: ['2ⁿ ⇄ n', 'Thêm nhị phân, hex, nhân, chia', 'Phân tích tổng, 2ⁿ−1, số bit, lũy thừa lớn nhất ≤ N'],
-  duration: () => 75, par: [4, 6, 10],
+  duration: (diff) => [60, 80, 105][diff], par: [4.0, 7.0, 12.0],
   gen(L) {
     const types = L === 0 ? ['val', 'exp'] : L === 1 ? ['val', 'exp', 'bin', 'hex', 'mul', 'div'] : ['val', 'exp', 'sum', 'sum', 'minus1', 'bits', 'floor', 'mul', 'div', 'hex'];
     const t = KM.pick(types), P = (n) => 2 ** n;
@@ -852,7 +852,7 @@ const GamePow = {
     }
   },
   create(s) {
-    const L = s.diff, BASE = [30, 50, 85][L];
+    const L = s.diff, BASE = [30, 70, 160][L];
     let cur, busy = false;
     const els = {};
     function submit() {
@@ -908,4 +908,382 @@ const GamePow = {
   },
 };
 
-const GAMES = [GameSprint, GameDecode, GameReverse, GameHunter, GameCoords, GamePow];
+/* =====================================================================
+   7) ĐẤU TRƯỜNG SỐ NGUYÊN — Dấu lượng, Bù 1, Bù 2, Excess-K
+   ===================================================================== */
+const GameInt = {
+  id: 'int_arena', name: 'Đấu Trường Số Nguyên', icon: '🔢', color: '#38bdf8',
+  tagline: 'Dấu Lượng ⇄ Bù 1 ⇄ Bù 2 ⇄ Excess-K',
+  desc: 'Chinh phục 4 dạng biểu diễn số nguyên then chốt trong kiến trúc máy tính. Phản xạ giải mã 2 chiều nhị phân ⇄ thập phân, nhận diện bẫy hai số 0 (+0 / -0) và điểm cực trị âm bất đối xứng.',
+  rules: [
+    'Phản xạ chuyển đổi nhị phân ⇄ thập phân qua 4 hệ biểu diễn',
+    'Phím tắt: bấm 1, 2, 3, 4 trên bàn phím hoặc nhấp chuột để chọn phương án',
+    'Trả lời đúng cộng điểm + combo; sai trừ 2s và hiển thị phân tích từng bit'
+  ],
+  levels: [
+    '4-bit cơ bản: các số nguyên chuẩn và dải giá trị [-8, 7]',
+    '8-bit nâng cao: hỗn hợp 4 hệ, mã lệch Excess-128 / Excess-127',
+    'Địa ngục 8-bit & 16-bit: bẫy cực trị âm (-128, -32768) và bẫy hai số 0'
+  ],
+  duration: (diff) => [55, 75, 100][diff], par: [3.5, 5.5, 8.5],
+  create(s) {
+    const L = s.diff, BASE = [30, 75, 165][L];
+    let cur, busy = false;
+    const els = {};
+
+    function renderChoices(opts) {
+      return opts.map((opt, i) => `
+        <button type="button" class="choice-btn" data-idx="${i}">
+          <span class="choice-key">${i + 1}</span>
+          <span class="choice-text">${opt}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderBitBoxes(binStr) {
+      if (!binStr || typeof binStr !== 'string') return '';
+      const n = binStr.length;
+      return `<div class="bit-strip">${binStr.split('').map((b, i) => `
+        <div class="bit-box">
+          <div class="bit-val hl-${b}">${b}</div>
+          <div class="bit-idx">${n - 1 - i}</div>
+        </div>
+      `).join('')}</div>`;
+    }
+
+    function answer(idx, btnEl) {
+      if (busy || !s.active) return;
+      const ok = idx === cur.correctIndex;
+      const buttons = els.grid.querySelectorAll('.choice-btn');
+
+      if (ok) {
+        if (btnEl) btnEl.classList.add('ok');
+        s.right({ base: BASE, el: btnEl || els.card, q: cur.prompt, a: cur.options[cur.correctIndex] });
+        els.card.classList.remove('ok-flash'); void els.card.offsetWidth; els.card.classList.add('ok-flash');
+        busy = true;
+        setTimeout(() => { if (!s.ended) ctrl.next(); }, 250);
+      } else {
+        if (btnEl) btnEl.classList.add('bad');
+        if (buttons[cur.correctIndex]) buttons[cur.correctIndex].classList.add('ok');
+        s.wrong({ penalty: 2, el: btnEl || els.card, q: cur.prompt, a: cur.options[cur.correctIndex], u: cur.options[idx] });
+        els.fb.innerHTML = fbBox('bad', `✗ ${cur.explanation}`);
+        busy = true; s.hold();
+        setTimeout(() => { s.release(); if (!s.ended) ctrl.next(); }, 1400);
+      }
+    }
+
+    const ctrl = {
+      mount(stage) {
+        stage.innerHTML = `
+        <div class="num-stage">
+          <div class="num-card glass">
+            <div class="num-tag"></div>
+            <div class="num-q"></div>
+            <div class="num-visual"></div>
+            <div class="choices-grid"></div>
+            <div class="feedback"></div>
+          </div>
+        </div>`;
+        Object.assign(els, {
+          card: stage.querySelector('.num-card'),
+          tag: stage.querySelector('.num-tag'),
+          q: stage.querySelector('.num-q'),
+          visual: stage.querySelector('.num-visual'),
+          grid: stage.querySelector('.choices-grid'),
+          fb: stage.querySelector('.feedback')
+        });
+
+        els.grid.addEventListener('click', (e) => {
+          const btn = e.target.closest('.choice-btn');
+          if (btn && !busy) {
+            const idx = parseInt(btn.dataset.idx, 10);
+            answer(idx, btn);
+          }
+        });
+      },
+      next() {
+        busy = false;
+        cur = NumEngine.Gen.genIntQuestion(L);
+        els.tag.textContent = cur.title;
+        els.q.innerHTML = cur.prompt;
+        els.visual.innerHTML = cur.bin ? renderBitBoxes(cur.bin) : '';
+        els.grid.innerHTML = renderChoices(cur.options);
+        els.fb.innerHTML = '';
+        els.q.classList.remove('pop-in'); void els.q.offsetWidth; els.q.classList.add('pop-in');
+        s.newQuestion();
+      },
+      focus() {},
+      onKey(e) {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          e.preventDefault();
+          const idx = parseInt(e.key, 10) - 1;
+          const btns = els.grid.querySelectorAll('.choice-btn');
+          if (btns[idx]) answer(idx, btns[idx]);
+        }
+      }
+    };
+    return ctrl;
+  }
+};
+
+/* =====================================================================
+   8) VÕ ĐÀI ALU — Phép toán +, -, SAL, SAR, SHR & Cờ Tràn
+   ===================================================================== */
+const GameALU = {
+  id: 'alu_arena', name: 'Võ Đài ALU', icon: '⚔️', color: '#f59e0b',
+  tagline: 'Phép toán +, -, SAL, SAR, SHR & Cờ Tràn',
+  desc: 'Mô phỏng bộ xử lý ALU thực thụ: tính nhanh các phép dịch bit (SAR giữ dấu vs SHR chèn 0), cộng trừ Bù 2, phát hiện cờ Tràn (Overflow V=1) và quy tắc End-Around Carry trong Bù 1.',
+  rules: [
+    'SAR: dịch phải số học giữ nguyên bit dấu MSB (chia nguyên cho 2)',
+    'SHR: dịch phải logic luôn chèn 0 · SAL: dịch trái chèn 0',
+    'Cộng Bù 2: kiểm tra tràn khi 2 số cùng dấu sinh kết quả ngược dấu',
+    'Bù 1: quy tắc End-around carry dồn bit nhớ MSB về lại LSB'
+  ],
+  levels: [
+    '4-bit: Lệnh dịch bit (SAR, SHR, SAL) và cộng Bù 2 cơ bản',
+    '8-bit: Cộng/Trừ Bù 2, soi cờ Tràn Overflow (V) và Carry-out',
+    'Địa ngục: Quy tắc End-Around Carry Bù 1, xoay bit ROL/ROR'
+  ],
+  duration: (diff) => [55, 80, 105][diff], par: [4.0, 7.0, 11.0],
+  create(s) {
+    const L = s.diff, BASE = [35, 85, 190][L];
+    let cur, busy = false;
+    const els = {};
+
+    function renderChoices(opts) {
+      return opts.map((opt, i) => `
+        <button type="button" class="choice-btn" data-idx="${i}">
+          <span class="choice-key">${i + 1}</span>
+          <span class="choice-text">${opt}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderOperands(operands) {
+      if (!operands || !operands.length) return '';
+      return `<div style="display:flex; flex-direction:column; gap:0.5rem; align-items:center;">
+        ${operands.map((op, i) => `
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span class="mono muted small">Thanh ghi ${i === 0 ? 'A' : 'B'}:</span>
+            <div class="bit-strip">${op.split('').map((b, bi) => `
+              <div class="bit-box">
+                <div class="bit-val hl-${b}">${b}</div>
+                <div class="bit-idx">${op.length - 1 - bi}</div>
+              </div>
+            `).join('')}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+
+    function answer(idx, btnEl) {
+      if (busy || !s.active) return;
+      const ok = idx === cur.correctIndex;
+      const buttons = els.grid.querySelectorAll('.choice-btn');
+
+      if (ok) {
+        if (btnEl) btnEl.classList.add('ok');
+        s.right({ base: BASE, el: btnEl || els.card, q: cur.prompt, a: cur.options[cur.correctIndex] });
+        els.card.classList.remove('ok-flash'); void els.card.offsetWidth; els.card.classList.add('ok-flash');
+        busy = true;
+        setTimeout(() => { if (!s.ended) ctrl.next(); }, 250);
+      } else {
+        if (btnEl) btnEl.classList.add('bad');
+        if (buttons[cur.correctIndex]) buttons[cur.correctIndex].classList.add('ok');
+        s.wrong({ penalty: 2, el: btnEl || els.card, q: cur.prompt, a: cur.options[cur.correctIndex], u: cur.options[idx] });
+        els.fb.innerHTML = fbBox('bad', `✗ ${cur.explanation}`);
+        busy = true; s.hold();
+        setTimeout(() => { s.release(); if (!s.ended) ctrl.next(); }, 1600);
+      }
+    }
+
+    const ctrl = {
+      mount(stage) {
+        stage.innerHTML = `
+        <div class="num-stage">
+          <div class="num-card glass">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="num-tag"></div>
+              <div class="alu-header-badge"></div>
+            </div>
+            <div class="num-q"></div>
+            <div class="num-visual"></div>
+            <div class="choices-grid"></div>
+            <div class="feedback"></div>
+          </div>
+        </div>`;
+        Object.assign(els, {
+          card: stage.querySelector('.num-card'),
+          tag: stage.querySelector('.num-tag'),
+          badge: stage.querySelector('.alu-header-badge'),
+          q: stage.querySelector('.num-q'),
+          visual: stage.querySelector('.num-visual'),
+          grid: stage.querySelector('.choices-grid'),
+          fb: stage.querySelector('.feedback')
+        });
+
+        els.grid.addEventListener('click', (e) => {
+          const btn = e.target.closest('.choice-btn');
+          if (btn && !busy) {
+            const idx = parseInt(btn.dataset.idx, 10);
+            answer(idx, btn);
+          }
+        });
+      },
+      next() {
+        busy = false;
+        cur = NumEngine.Gen.genALUQuestion(L);
+        els.tag.textContent = cur.title;
+        els.badge.innerHTML = `<span class="alu-op-badge">${cur.opcode}</span>`;
+        els.q.innerHTML = cur.prompt;
+        els.visual.innerHTML = renderOperands(cur.operands);
+        els.grid.innerHTML = renderChoices(cur.options);
+        els.fb.innerHTML = '';
+        els.q.classList.remove('pop-in'); void els.q.offsetWidth; els.q.classList.add('pop-in');
+        s.newQuestion();
+      },
+      focus() {},
+      onKey(e) {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          e.preventDefault();
+          const idx = parseInt(e.key, 10) - 1;
+          const btns = els.grid.querySelectorAll('.choice-btn');
+          if (btns[idx]) answer(idx, btns[idx]);
+        }
+      }
+    };
+    return ctrl;
+  }
+};
+
+/* =====================================================================
+   9) PHI HÀNH GIA CHẤM ĐỘNG — IEEE 754 & Mini-float
+   ===================================================================== */
+const GameFloat = {
+  id: 'float_studio', name: 'Phi Hành Gia Chấm Động', icon: '🛸', color: '#ec4899',
+  tagline: 'Giải mã IEEE 754 & Mini-float',
+  desc: 'Mổ xẻ số chấm động chuẩn quốc tế IEEE 754: 3 trường bit Dấu (Sign), Số mũ lệch (Exponent), Phần định trị (Mantissa). Làm chủ số chuẩn, số dưới chuẩn (Denormalized) và các giá trị đặc biệt (±0, ±∞, NaN).',
+  rules: [
+    '3 trường màu: Cyan (Dấu S) · Amber (Số mũ E) · Tím (Định trị M)',
+    'Normalized: (-1)^S × 2^(E - Bias) × (1 + M)',
+    'Denormalized: E=0 → bit ẩn = 0, công thức 2^(1 - Bias) × M',
+    'E tối đa: M=0 → Vô cực (±∞) · M ≠ 0 → NaN',
+    'Phím tắt 1, 2, 3, 4 để chọn nhanh đáp án'
+  ],
+  levels: [
+    '8-bit Mini-float (1-4-3, Bias 7): Số chuẩn Normalized đẹp (1.0, 1.5, 2.0, 3.5, ...)',
+    '8-bit Mini-float: Số dưới chuẩn Denormalized, Zeros (±0), Infinities (±∞), NaN',
+    'Địa ngục: IEEE 754 Bán chính xác FP16 (16-bit) & Đơn chính xác FP32 (32-bit)'
+  ],
+  duration: (diff) => [60, 85, 115][diff], par: [4.5, 8.0, 13.0],
+  create(s) {
+    const L = s.diff, BASE = [35, 90, 200][L];
+    let cur, busy = false;
+    const els = {};
+
+    function renderChoices(opts) {
+      return opts.map((opt, i) => `
+        <button type="button" class="choice-btn" data-idx="${i}">
+          <span class="choice-key">${i + 1}</span>
+          <span class="choice-text">${opt}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderFloatVisual(binStr, spec) {
+      if (!binStr || !spec) return '';
+      const sBit = binStr[0];
+      const eBits = binStr.slice(1, 1 + spec.expBits);
+      const mBits = binStr.slice(1 + spec.expBits);
+
+      return `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0.6rem;">
+        <div class="fp-bit-strip" style="font-size:1.4rem;">
+          <span class="fp-s" title="Bit Dấu (Sign: ${sBit === '0' ? '+ (0)' : '- (1)'})">${sBit}</span>
+          <span class="fp-e" title="Số Mũ (Exp: ${eBits} = ${parseInt(eBits, 2)})">${eBits}</span>
+          <span class="fp-m" title="Định Trị (Mantissa: ${mBits})">${mBits}</span>
+        </div>
+        <div style="display:flex; gap:1.2rem; font-size:0.75rem; font-family:var(--font-mono); color:var(--text-muted);">
+          <span><b style="color:var(--c-cyan);">S</b>: Dấu (1-bit)</span>
+          <span><b style="color:var(--c-amber);">E</b>: Mũ (Bias ${spec.bias})</span>
+          <span><b style="color:var(--c-purple);">M</b>: Định trị (${spec.mantBits}-bit)</span>
+        </div>
+      </div>`;
+    }
+
+    function answer(idx, btnEl) {
+      if (busy || !s.active) return;
+      const ok = idx === cur.correctIndex;
+      const buttons = els.grid.querySelectorAll('.choice-btn');
+
+      if (ok) {
+        if (btnEl) btnEl.classList.add('ok');
+        s.right({ base: BASE, el: btnEl || els.card, q: cur.prompt, a: cur.options[cur.correctIndex] });
+        els.card.classList.remove('ok-flash'); void els.card.offsetWidth; els.card.classList.add('ok-flash');
+        busy = true;
+        setTimeout(() => { if (!s.ended) ctrl.next(); }, 250);
+      } else {
+        if (btnEl) btnEl.classList.add('bad');
+        if (buttons[cur.correctIndex]) buttons[cur.correctIndex].classList.add('ok');
+        s.wrong({ penalty: 2, el: btnEl || els.card, q: cur.prompt, a: cur.options[cur.correctIndex], u: cur.options[idx] });
+        els.fb.innerHTML = fbBox('bad', `✗ ${cur.explanation}`);
+        busy = true; s.hold();
+        setTimeout(() => { s.release(); if (!s.ended) ctrl.next(); }, 1600);
+      }
+    }
+
+    const ctrl = {
+      mount(stage) {
+        stage.innerHTML = `
+        <div class="num-stage">
+          <div class="num-card glass">
+            <div class="num-tag"></div>
+            <div class="num-q"></div>
+            <div class="num-visual"></div>
+            <div class="choices-grid"></div>
+            <div class="feedback"></div>
+          </div>
+        </div>`;
+        Object.assign(els, {
+          card: stage.querySelector('.num-card'),
+          tag: stage.querySelector('.num-tag'),
+          q: stage.querySelector('.num-q'),
+          visual: stage.querySelector('.num-visual'),
+          grid: stage.querySelector('.choices-grid'),
+          fb: stage.querySelector('.feedback')
+        });
+
+        els.grid.addEventListener('click', (e) => {
+          const btn = e.target.closest('.choice-btn');
+          if (btn && !busy) {
+            const idx = parseInt(btn.dataset.idx, 10);
+            answer(idx, btn);
+          }
+        });
+      },
+      next() {
+        busy = false;
+        cur = NumEngine.Gen.genFloatQuestion(L);
+        els.tag.textContent = cur.title;
+        els.q.innerHTML = cur.prompt;
+        els.visual.innerHTML = cur.binStr ? renderFloatVisual(cur.binStr, cur.spec) : '';
+        els.grid.innerHTML = renderChoices(cur.options);
+        els.fb.innerHTML = '';
+        els.q.classList.remove('pop-in'); void els.q.offsetWidth; els.q.classList.add('pop-in');
+        s.newQuestion();
+      },
+      focus() {},
+      onKey(e) {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          e.preventDefault();
+          const idx = parseInt(e.key, 10) - 1;
+          const btns = els.grid.querySelectorAll('.choice-btn');
+          if (btns[idx]) answer(idx, btns[idx]);
+        }
+      }
+    };
+    return ctrl;
+  }
+};
+
+const GAMES = [GameSprint, GameDecode, GameReverse, GameHunter, GameCoords, GamePow, GameInt, GameALU, GameFloat];

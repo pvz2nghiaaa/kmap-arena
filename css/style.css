@@ -1159,10 +1159,217 @@ kbd {
 }
 .st-group { display: flex; flex-direction: column; gap: 0.65rem; }
 
+/* ==========================================================================
+   KIẾN TRÚC MÁY TÍNH & HỆ THỐNG SỐ HỌC (NUM-ENGINE STYLES)
+   ========================================================================== */
+.num-stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  width: 100%;
+}
+.num-card {
+  width: 100%;
+  max-width: 780px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  padding: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.num-tag {
+  align-self: flex-start;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--c-cyan);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+}
+.num-q {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+.num-q code {
+  font-family: var(--font-mono);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--c-cyan);
+}
+
+/* Bit Strips & Registers */
+.bit-strip {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.bit-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  min-width: 36px;
+}
+.bit-val {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+}
+.bit-idx {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* Floating-Point Color-coded Bit Strip */
+.fp-bit-strip {
+  display: inline-flex;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.fp-s {
+  color: var(--c-cyan);
+  border-bottom: 2px solid var(--c-cyan);
+  padding: 0 0.2rem;
+}
+.fp-e {
+  color: var(--c-amber);
+  border-bottom: 2px solid var(--c-amber);
+  padding: 0 0.2rem;
+}
+.fp-m {
+  color: var(--c-purple);
+  border-bottom: 2px solid var(--c-purple);
+  padding: 0 0.2rem;
+}
+
+/* ALU Opcode Badges & Flags */
+.alu-op-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.3));
+  border: 1px solid var(--c-amber);
+  color: var(--c-amber);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+.alu-flags-row {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+.alu-flag-pill {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.alu-flag-pill.active {
+  background: rgba(251, 113, 133, 0.25);
+  color: var(--c-rose);
+  border-color: var(--c-rose);
+  box-shadow: 0 0 10px rgba(251, 113, 133, 0.4);
+}
+
+/* Multi-Choice Option Cards */
+.choices-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+.choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.16s ease;
+}
+.choice-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--border-focus);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.choice-btn:active {
+  transform: translateY(0);
+}
+.choice-btn.ok {
+  background: rgba(52, 211, 153, 0.25) !important;
+  border-color: var(--c-emerald) !important;
+  color: #fff !important;
+}
+.choice-btn.bad {
+  background: rgba(251, 113, 133, 0.25) !important;
+  border-color: var(--c-rose) !important;
+  color: #fff !important;
+}
+.choice-key {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--c-cyan);
+  flex-shrink: 0;
+}
+.choice-text {
+  flex: 1;
+}
+
 /* Responsive Media Queries */
 @media (max-width: 900px) {
   .split { grid-template-columns: 1fr; justify-items: center; }
   .sb-layout { grid-template-columns: 1fr; }
   .learn-grid { grid-template-columns: 1fr; }
+  .choices-grid { grid-template-columns: 1fr; }
   header.app-header { flex-direction: column; gap: 0.75rem; padding: 0.75rem 1rem; }
 }
