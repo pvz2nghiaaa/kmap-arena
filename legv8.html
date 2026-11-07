@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEGv8 Code Master — Trình Giả Lập &amp; Biên Dịch C sang Hợp Ngữ LEGv8</title>
+  <meta name="description" content="Trò chơi giáo dục lập trình và kiến trúc máy tính: Biên dịch mã nguồn C sang tập lệnh hợp ngữ 64-bit ARM/LEGv8 theo chuẩn Patterson & Hennessy với bộ mô phỏng CPU trực tiếp trên trình duyệt.">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/legv8.css">
+</head>
+<body class="legv8-theme">
+  <!-- Dynamic Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <canvas id="fx-canvas"></canvas>
+
+  <div class="legv8-app">
+    <!-- Top Header Navigation -->
+    <header class="legv8-header">
+      <div style="display:flex; align-items:center; gap:1.2rem;">
+        <a href="index.html" class="legv8-brand" title="Quay về K-Map Arena Hub">
+          <div class="legv8-logo-icon">V8</div>
+          <div>
+            <div class="legv8-brand-title">LEGv8 CODE MASTER</div>
+          </div>
+        </a>
+        <span id="tier-badge" class="legv8-tier-badge tier-1">Tier 1</span>
+        
+        <select id="level-select" class="legv8-btn" style="padding:0.35rem 0.6rem; max-width:280px; font-weight:700;">
+          <!-- Loaded dynamically -->
+        </select>
+      </div>
+
+      <!-- Center Status: Countdown Timer & Score -->
+      <div class="legv8-status-center">
+        <div id="timer-box" class="legv8-timer-box" title="Thời gian thử thách của màn chơi">
+          <span>⏱</span>
+          <span id="timer-val">03:00</span>
+        </div>
+
+        <div class="legv8-score-box">
+          <span>ĐIỂM TÍCH LŨY:</span>
+          <b id="total-score-val">0</b>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="legv8-header-right">
+        <button id="btn-open-handbook" type="button" class="legv8-btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #8b5cf6);">
+          📚 Cẩm Nang LEGv8
+        </button>
+        <button id="toggle-mode-btn" type="button" class="legv8-btn">
+          🧩 Điền Khuyết (Scaffold)
+        </button>
+        <a href="index.html" class="legv8-btn" style="text-decoration:none;">
+          ⤺ K-Map Arena
+        </a>
+      </div>
+    </header>
+
+    <!-- Main 3-Column IDE Workspace -->
+    <main class="legv8-workspace">
+      <!-- CỘT 1: ĐỀ BÀI, MÃ NGUỒN C & HƯỚNG DẪN -->
+      <section class="legv8-panel">
+        <div class="panel-head">
+          <span class="panel-title">📄 Đề Bài &amp; Mã Nguồn C</span>
+        </div>
+        <div class="panel-body">
+          <h3 id="level-title" style="font-size:0.95rem; margin-bottom:0.5rem; color:#38bdf8;">Đang tải...</h3>
+          <p id="level-desc" style="font-size:0.8rem; color:#94a3b8; line-height:1.5; margin-bottom:0.8rem;"></p>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">MÃ NGUỒN C CẦN DỊCH:</div>
+          <div id="c-code-card" class="c-code-card"></div>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; margin-top:1rem; margin-bottom:0.3rem;">GỢI Ý GIẢI BÀI:</div>
+          <div id="hints-container" class="hint-accordion">
+            <!-- Hints -->
+          </div>
+
+          <div style="margin-top:1.5rem; padding:0.8rem; background:rgba(30,41,59,0.4); border:1px solid rgba(56,189,248,0.2); border-radius:8px; font-size:0.78rem; color:#94a3b8;">
+            💡 <i>Cần ôn lại quy ước thanh ghi, lệnh dịch bit, Stack hay lệnh nhảy? Bấm nút <b>📚 Cẩm Nang LEGv8</b> ở góc trên để tra cứu tức thời.</i>
+          </div>
+        </div>
+      </section>
+
+      <!-- CỘT 2: TRÌNH SOẠN THẢO LEGv8 EDITOR -->
+      <section class="legv8-panel editor-panel">
+        <div class="editor-toolbar">
+          <div class="toolbar-left">
+            <button id="btn-run" type="button" class="legv8-btn btn-primary" title="Nộp bài &amp; Chạy toàn bộ Test Cases (Ctrl + Enter)">
+              ▶ COMPILE &amp; RUN <kbd style="font-size:0.7rem; background:rgba(0,0,0,0.3); padding:2px 4px; border-radius:3px;">Ctrl+Enter</kbd>
+            </button>
+            <button id="btn-step" type="button" class="legv8-btn btn-success" title="Chạy từng lệnh một để gỡ lỗi trực quan">
+              ↷ Từng Bước (Step)
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <button id="btn-reset" type="button" class="legv8-btn" title="Khôi phục lại mã ban đầu">
+              ↺ Khôi Phục
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-container">
+          <!-- Line Numbers -->
+          <div id="line-numbers" class="line-numbers"></div>
+          <!-- Pro Text Area -->
+          <textarea id="code-textarea" class="code-textarea" spellcheck="false" placeholder="// Nhập mã hợp ngữ LEGv8 của bạn ở đây..."></textarea>
+          <!-- Scaffold Mode View -->
+          <div id="scaffold-view" class="scaffold-view" style="display:none;"></div>
+        </div>
+      </section>
+
+      <!-- CỘT 3: VISUAL INSPECTOR (REGISTERS, STACK & TEST RUNNER) -->
+      <section class="legv8-panel inspector-panel">
+        <!-- Flags Strip (Always visible) -->
+        <div class="flags-strip">
+          <div class="flag-item"><span id="flag-n" class="flag-badge">N</span> <small style="color:#64748b;">Âm</small></div>
+          <div class="flag-item"><span id="flag-z" class="flag-badge">Z</span> <small style="color:#64748b;">Zero</small></div>
+          <div class="flag-item"><span id="flag-c" class="flag-badge">C</span> <small style="color:#64748b;">Carry</small></div>
+          <div class="flag-item"><span id="flag-v" class="flag-badge">V</span> <small style="color:#64748b;">Tràn</small></div>
+        </div>
+
+        <!-- Tab Bar: Chuyển đổi linh hoạt giữa Kiểm Thử, Thanh Ghi và Ngăn Xếp -->
+        <div class="inspector-tabs">
+          <button type="button" class="inspector-tab active" data-tab="tests">
+            <span>🧪</span> <span>Kiểm Thử</span>
+          </button>
+          <button type="button" class="inspector-tab" data-tab="regs">
+            <span>⚡</span> <span>Thanh Ghi</span>
+          </button>
+          <button type="button" class="inspector-tab" data-tab="stack">
+            <span>📦</span> <span>Ngăn Xếp</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Test Runner Console (Mặc định mở để người chơi thấy ngay kết quả) -->
+        <div id="tab-content-tests" class="inspector-tab-content active">
+          <div class="panel-head" style="padding:0.4rem 0.8rem;">
+            <span class="panel-title" style="font-size:0.76rem;">🧪 Kết Quả Kiểm Thử (Test Runner Console)</span>
+          </div>
+          <div id="test-console" class="test-console" style="flex:1; overflow-y:auto;">
+            <!-- Test cases status -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Registers Grid -->
+        <div id="tab-content-regs" class="inspector-tab-content">
+          <div class="panel-head" style="padding:0.4rem 0.8rem;">
+            <span class="panel-title" style="font-size:0.76rem;">⚡ Trạng Thái Thanh Ghi (CPU Registers)</span>
+          </div>
+          <div id="reg-grid" class="reg-grid" style="flex:1; overflow-y:auto;">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+
+        <!-- Tab 3: Stack Memory View -->
+        <div id="tab-content-stack" class="inspector-tab-content">
+          <div class="panel-head" style="padding:0.4rem 0.8rem;">
+            <span class="panel-title" style="font-size:0.76rem;">📦 Ngăn Xếp (Stack Pointer &amp; Memory)</span>
+          </div>
+          <div id="stack-view" class="stack-view" style="flex:1; overflow-y:auto;">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- VICTORY OVERLAY MODAL -->
+  <div id="victory-modal" class="legv8-overlay">
+    <div class="victory-box">
+      <div style="font-size:2.8rem; margin-bottom:0.3rem;">🎉</div>
+      <h2 class="victory-title">CHÍNH XÁC XUẤT SẮC!</h2>
+      <p style="color:#94a3b8; font-size:0.88rem;">Chương trình LEGv8 của bạn đã vượt qua toàn bộ các bộ kiểm thử và tuân thủ hoàn hảo chuẩn ABI phần cứng!</p>
+
+      <div class="score-breakdown">
+        <div class="score-row">
+          <span>Điểm cơ sở màn chơi:</span>
+          <span id="modal-base-score" style="color:#38bdf8;">+500</span>
+        </div>
+        <div class="score-row">
+          <span>Thưởng thời gian còn lại:</span>
+          <span id="modal-time-bonus" style="color:#10b981;">+0</span>
+        </div>
+        <div class="score-row">
+          <span>Phạt số lần nộp sai:</span>
+          <span id="modal-penalty" style="color:#f43f5e;">-0</span>
+        </div>
+        <div class="score-row total">
+          <span>TỔNG ĐIỂM ĐẠT ĐƯỢC:</span>
+          <span id="modal-total-score">+500</span>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:1rem;">
+        <button id="btn-next-level" type="button" class="legv8-btn btn-primary" style="padding:0.6rem 1.5rem; font-size:0.95rem;">
+          Màn Tiếp Theo ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CẨM NANG LEGv8 MODAL (HANDBOOK) -->
+  <div id="handbook-modal" class="legv8-overlay">
+    <div class="handbook-box">
+      <div class="handbook-head">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span style="font-size:1.4rem;">📚</span>
+          <h2 style="font-size:1.15rem; color:#fff; font-weight:800;">CẨM NANG HỢP NGỮ LEGv8 (ARMv8 64-BIT)</h2>
+        </div>
+        <button id="btn-close-handbook" type="button" class="legv8-btn" style="padding:0.3rem 0.7rem; font-size:1rem; cursor:pointer;">✕ Đóng</button>
+      </div>
+
+      <div class="handbook-body">
+        <!-- Phần 1: Tập thanh ghi -->
+        <div class="handbook-section">
+          <h3>⚡ 1. Quy Ước Tập Thanh Ghi 64-bit &amp; Điều Cấm Kỵ</h3>
+          <p>Tập thanh ghi LEGv8 theo giáo trình chuẩn máy tính Patterson &amp; Hennessy:</p>
+          <table class="handbook-table">
+            <thead>
+              <tr>
+                <th>Thanh ghi</th>
+                <th>Tên gọi &amp; Ý nghĩa</th>
+                <th>Trách nhiệm bảo tồn</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b style="color:var(--reg-caller);">X0 – X7</b></td>
+                <td>Truyền tham số đầu vào cho hàm &amp; Trả về kết quả (qua X0)</td>
+                <td>Caller-saved (Người gọi tự lưu)</td>
+              </tr>
+              <tr>
+                <td><b style="color:var(--reg-temp);">X9 – X15</b></td>
+                <td>Thanh ghi tạm thời cho các phép toán trung gian</td>
+                <td>Caller-saved (Không bảo toàn qua hàm)</td>
+              </tr>
+              <tr>
+                <td><b style="color:#c084fc;">X16 – X17</b></td>
+                <td>IP0, IP1: Thanh ghi nháp nội bộ cho linker / gọi hàm</td>
+                <td>Caller-saved</td>
+              </tr>
+              <tr>
+                <td><b style="color:#c084fc;">X18</b></td>
+                <td>Platform Register: Dành riêng cho nền tảng hệ điều hành</td>
+                <td>Đặc biệt</td>
+              </tr>
+              <tr>
+                <td><b style="color:var(--reg-callee);">X19 – X27</b></td>
+                <td>Lưu trữ biến cục bộ. BẮT BUỘC lưu vào Stack và khôi phục lại trước khi thoát hàm!</td>
+                <td>Callee-saved (Hàm được gọi phải bảo tồn)</td>
+              </tr>
+              <tr>
+                <td><b style="color:var(--reg-spec);">SP</b></td>
+                <td>Stack Pointer: Con trỏ đỉnh ngăn xếp (chỉ dùng từ khóa SP, căn lề 16-byte)</td>
+                <td>Callee-saved</td>
+              </tr>
+              <tr>
+                <td><b style="color:var(--reg-spec);">LR (X30)</b></td>
+                <td>Link Register: Lưu địa chỉ quay về khi gọi lệnh BL. Thoát hàm bằng BR LR</td>
+                <td>Caller-saved (Cần lưu nếu là non-leaf)</td>
+              </tr>
+              <tr>
+                <td><b style="color:var(--reg-spec);">XZR</b></td>
+                <td>Zero Register: Luôn bằng hằng số 0, mọi lệnh ghi vào XZR đều bị hủy bỏ</td>
+                <td>Hằng số 0</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top:0.6rem; padding:0.6rem 0.8rem; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:6px; color:#fca5a5;">
+            ⛔ <b>ĐIỀU CẤM KỴ:</b> Hệ thống phần cứng <b>NGHIÊM CẤM</b> sử dụng các thanh ghi: <code>X8</code>, <code>X28</code>, <code>X29</code>, <code>X31</code>. Luôn dùng <code>SP</code> thay cho X28, và dùng <code>XZR</code> thay cho X31!
+          </div>
+        </div>
+
+        <!-- Phần 2: Ngăn xếp & Khung hàm -->
+        <div class="handbook-section">
+          <h3>📦 2. Kiến Trúc Ngăn Xếp (Stack Frame) &amp; Thủ Tục</h3>
+          <p>Ngăn xếp phát triển từ <b>địa chỉ cao xuống địa chỉ thấp</b>. Kích thước cấp phát luôn là bội số của 16 bytes.</p>
+          <div class="handbook-code">// 1. Thủ tục Lá (Leaf Procedure - Không gọi hàm con khác):
+leaf:
+    ADD   X9, X0, X1      // Tính toán trực tiếp
+    SUB   X0, X9, X2      // Trả kết quả qua X0
+    BR    LR              // Quay về ngay lập tức (không cần Stack)
+
+// 2. Thủ tục Non-Leaf / Đệ Quy (Có gọi hàm khác qua BL):
+func:
+    SUBI  SP, SP, #16     // Cấp phát 16 bytes trên ngăn xếp
+    STUR  X30, [SP, #8]   // Lưu LR (địa chỉ quay về)
+    STUR  X0,  [SP, #0]   // Lưu tham số X0
+    
+    // ... gọi hàm con bằng BL func_con ...
+    
+    LDUR  X0,  [SP, #0]   // Khôi phục tham số
+    LDUR  X30, [SP, #8]   // Khôi phục LR
+    ADDI  SP, SP, #16     // Giải phóng ngăn xếp
+    BR    LR              // Quay về</div>
+        </div>
+
+        <!-- Phần 3: Bảng tra cứu tập lệnh -->
+        <div class="handbook-section">
+          <h3>📑 3. Bảng Tra Cứu Nhanh Tập Lệnh LEGv8</h3>
+          <table class="handbook-table">
+            <thead>
+              <tr>
+                <th>Lệnh</th>
+                <th>Cú pháp mẫu</th>
+                <th>Ý nghĩa hoạt động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ADD / SUB</code></td><td><code>ADD Rd, Rn, Rm</code></td><td>Cộng / Trừ 2 thanh ghi: Rd = Rn ± Rm</td></tr>
+              <tr><td><code>ADDI / SUBI</code></td><td><code>ADDI Rd, Rn, #imm</code></td><td>Cộng / Trừ với hằng số tức thời (bắt đầu bằng #)</td></tr>
+              <tr><td><code>SUBS / SUBIS</code></td><td><code>SUBS XZR, Rn, Rm</code></td><td>Trừ và cập nhật cờ N, Z, C, V (Dùng để so sánh Rn với Rm)</td></tr>
+              <tr><td><code>MUL</code></td><td><code>MUL Rd, Rn, Rm</code></td><td>Nhân 2 thanh ghi: Rd = Rn × Rm</td></tr>
+              <tr><td><code>LSL / LSR</code></td><td><code>LSL Rd, Rn, #3</code></td><td>Dịch trái / phải bit (#3 tương đương nhân 8 tính byte offset mảng)</td></tr>
+              <tr><td><code>AND / ORR / EOR</code></td><td><code>AND Rd, Rn, Rm</code></td><td>Phép toán logic bit AND, OR, XOR</td></tr>
+              <tr><td><code>LDUR</code></td><td><code>LDUR Rt, [Rn, #offset]</code></td><td>Nạp 64-bit từ ô nhớ: Rt = RAM[Rn + offset]</td></tr>
+              <tr><td><code>STUR</code></td><td><code>STUR Rt, [Rn, #offset]</code></td><td>Lưu 64-bit vào ô nhớ: RAM[Rn + offset] = Rt</td></tr>
+              <tr><td><code>B</code></td><td><code>B Label</code></td><td>Nhảy không điều kiện tới nhãn Label</td></tr>
+              <tr><td><code>B.cond</code></td><td><code>B.EQ / B.NE / B.GE / B.LE</code></td><td>Nhảy có điều kiện theo cờ (Bằng, Khác, Lớn hơn, Nhỏ hơn)</td></tr>
+              <tr><td><code>CBZ / CBNZ</code></td><td><code>CBZ Rt, Label</code></td><td>Nhảy tới Label nếu Rt == 0 (hoặc != 0)</td></tr>
+              <tr><td><code>BL</code></td><td><code>BL func</code></td><td>Gọi hàm con (tự lưu PC+4 vào LR)</td></tr>
+              <tr><td><code>BR</code></td><td><code>BR LR</code></td><td>Nhảy về địa chỉ trong thanh ghi (thoát hàm)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/legv8-cpu.js?v=2"></script>
+  <script src="js/legv8-levels.js?v=2"></script>
+  <script src="js/legv8-ui.js?v=2"></script>
+</body>
+</html>

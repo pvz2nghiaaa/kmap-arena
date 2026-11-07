@@ -1286,4 +1286,43 @@ const GameFloat = {
   }
 };
 
-const GAMES = [GameSprint, GameDecode, GameReverse, GameHunter, GameCoords, GamePow, GameInt, GameALU, GameFloat];
+/* =====================================================================
+   10) LEGv8 CODE MASTER — Biên Dịch C sang Hợp Ngữ LEGv8 64-bit
+   ===================================================================== */
+const GameLEGv8 = {
+  id: 'legv8_master', name: 'LEGv8 Code Master', icon: '⚡', color: '#38bdf8',
+  tagline: 'Biên dịch C sang Hợp ngữ ARM/LEGv8',
+  desc: 'Đấu trường lập trình & kiến trúc máy tính 64-bit chuyên sâu: Dịch mã nguồn C sang tập lệnh LEGv8 (tập con ARMv8 chuẩn Patterson & Hennessy). Mô phỏng CPU ảo, kiểm tra chuẩn ABI ngăn xếp, bộ đếm thời gian và thử thách đệ quy.',
+  rules: [
+    'Tập thanh ghi 64-bit: X0-X7 (Tham số/Kết quả), X9-X15 (Tạm), X19-X27 (Bảo tồn), SP, LR, XZR',
+    'TUYỆT ĐỐI NGHIÊM CẤM sử dụng các thanh ghi X8, X28, X29, X31',
+    'Kiểm định 3 tầng: Cú pháp (Linting) · Chuẩn ABI & Stack · CPU Emulator',
+    'Hỗ trợ chế độ Điền khuyết (Scaffold) & Pro IDE Editor (Ctrl + Enter)',
+    'Bộ đếm thời gian & công thức tính điểm chuẩn đại học'
+  ],
+  levels: [
+    'Tier 1 & 2: Biểu thức số học cơ bản (ADD, SUB) & Mảng 1 chiều, Byte Offset (LSL #3, LDUR, STUR)',
+    'Tier 3 & 4: Rẽ nhánh, Vòng lặp (SUBS, B.cond) & Thủ tục lá Leaf Procedures (BR LR)',
+    'Tier 5: Thủ tục lồng nhau & Đệ quy Non-Leaf (BL, STUR/LDUR LR & Stack Frame)'
+  ],
+  duration: (diff) => [180, 240, 480][diff], par: [45, 60, 120],
+  create(s) {
+    // Chuyển hướng trực tiếp vào IDE chuyên dụng
+    window.location.href = 'legv8.html';
+    return {
+      mount(stage) {
+        stage.innerHTML = `
+          <div class="center" style="padding: 2rem;">
+            <h2>Đang mở LEGv8 Code Master IDE...</h2>
+            <p class="muted mt-2">Nếu trình duyệt không tự chuyển hướng, <a href="legv8.html" style="color:var(--c-cyan);">bấm vào đây để mở</a>.</p>
+          </div>
+        `;
+      },
+      next() {},
+      focus() {},
+      onKey() {}
+    };
+  }
+};
+
+const GAMES = [GameSprint, GameDecode, GameReverse, GameHunter, GameCoords, GamePow, GameInt, GameALU, GameFloat, GameLEGv8];

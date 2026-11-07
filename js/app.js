@@ -97,6 +97,23 @@ const App = (() => {
         </div>
       </section>
 
+      <!-- Featured Banner: LEGv8 Code Master -->
+      <section class="quick-banner glass" style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.22), rgba(139, 92, 246, 0.18)); border: 1px solid rgba(56, 189, 248, 0.4); margin-bottom: 2rem; box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);">
+        <div class="qb-icon" style="font-size: 1.8rem; background: linear-gradient(135deg, #0284c7, #8b5cf6); border-radius: 12px; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-family: var(--font-mono); box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);">V8</div>
+        <div class="qb-content">
+          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.25rem;">
+            <span class="pill sm" style="--pc:#38bdf8; font-weight:800;">MỚI RA MẮT</span>
+            <span class="pill sm" style="--pc:#a855f7; font-weight:700;">ARMv8 64-BIT IDE</span>
+            <span class="pill sm" style="--pc:#10b981; font-weight:700;">5 TIERS</span>
+          </div>
+          <h3 style="color:#fff; font-size:1.25rem; margin-bottom:0.25rem;">LEGv8 Code Master — Biên Dịch C sang Hợp Ngữ LEGv8</h3>
+          <p style="color:#cbd5e1; font-size:0.9rem; line-height:1.5;">Trò chơi giáo dục lập trình &amp; kiến trúc máy tính chuyên sâu: Bộ mô phỏng CPU 64-bit trực tiếp trên trình duyệt, kiểm tra chuẩn ABI tự động, trực quan hóa thanh ghi &amp; Stack Memory, thử thách 5 Tiers từ biểu thức cơ bản đến giai thừa đệ quy!</p>
+        </div>
+        <a href="legv8.html" style="text-decoration:none;">
+          <button class="btn primary" style="background:linear-gradient(135deg, #0284c7, #8b5cf6); box-shadow: 0 0 18px rgba(56, 189, 248, 0.5); font-size:0.95rem; padding:0.65rem 1.4rem; white-space:nowrap;">Vào Đấu Trường LEGv8 ➔</button>
+        </a>
+      </section>
+
       <section class="game-select-section">
         <div class="section-head">
           <h2>Chọn Chế Độ Luyện Tập</h2>
