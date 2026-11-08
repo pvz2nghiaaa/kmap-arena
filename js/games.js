@@ -1325,4 +1325,80 @@ const GameLEGv8 = {
   }
 };
 
-const GAMES = [GameSprint, GameDecode, GameReverse, GameHunter, GameCoords, GamePow, GameInt, GameALU, GameFloat, GameLEGv8];
+/* =====================================================================
+   11) LEGv8 REVERSE DECOMPILER — Dịch Ngược LEGv8 về Ngôn Ngữ C
+   ===================================================================== */
+const GameLEGv8Decompile = {
+  id: 'legv8_decompile', name: 'LEGv8 Decompiler', icon: '🔄', color: '#10b981',
+  tagline: 'Dịch ngược Hợp ngữ LEGv8 về mã C',
+  desc: 'Thử thách kỹ thuật đảo ngược: Đọc mã hợp ngữ LEGv8 và tái cấu trúc thành hàm C tương đương. Hỗ trợ Scaffold điền khuyết và Pro C Editor với bộ kiểm thử tự động.',
+  rules: [
+    'Phân tích mã hợp ngữ LEGv8 để xác định biểu thức, vòng lặp, rẽ nhánh và gọi hàm',
+    'Viết hàm C tương đương tuân thủ đúng signature và kiểu dữ liệu',
+    'Bộ kiểm thử tự động so sánh giá trị trả về và mảng trong bộ nhớ'
+  ],
+  levels: [
+    'Tier 1 & 2: Biểu thức số học, nhân đôi bit, hoán đổi mảng',
+    'Tier 3 & 4: Vòng lặp while, if-else, chuỗi ký tự strlen',
+    'Tier 5: Đệ quy giai thừa và dãy số Fibonacci'
+  ],
+  duration: (diff) => [180, 300, 480][diff], par: [60, 120, 240],
+  create(s) {
+    window.location.href = 'legv8-decompile.html';
+    return {
+      mount(stage) {
+        stage.innerHTML = `
+          <div class="center" style="padding: 2rem;">
+            <h2>Đang mở LEGv8 Decompiler...</h2>
+            <p class="muted mt-2">Nếu trình duyệt không tự chuyển hướng, <a href="legv8-decompile.html" style="color:var(--c-cyan);">bấm vào đây để mở</a>.</p>
+          </div>
+        `;
+      },
+      next() {},
+      focus() {},
+      onKey() {}
+    };
+  }
+};
+
+/* =====================================================================
+   12) LEGv8 LEETCODE ARENA — Luyện Thuật Toán Chuẩn LeetCode
+   ===================================================================== */
+const GameLEGv8LeetCode = {
+  id: 'legv8_leetcode', name: 'LEGv8 LeetCode', icon: '🏆', color: '#f59e0b',
+  tagline: 'Luyện thuật toán LeetCode bằng hợp ngữ 64-bit',
+  desc: 'Nền tảng luyện thuật toán chuẩn LeetCode: Two Sum, Palindrome Array, Count Evens, Move Zeroes, Single Number, Kadane Subarray... bằng hợp ngữ LEGv8 với Run Code và Submit.',
+  rules: [
+    'Triển khai hàm theo đúng signature và quy ước thanh ghi ABI',
+    'Vượt qua 100% test cases bao gồm test mẫu và các edge-case kiểm thử ẩn',
+    'Tính toán Runtime (chu kỳ CPU) và xếp hạng hiệu năng'
+  ],
+  levels: [
+    'Easy: Two Sum, Palindrome Array, Count Evens, Power of Two',
+    'Medium: Maximum Index, Move Zeroes In-Place, Single Number XOR',
+    'Hard: Thuật toán Kadane - Dãy con có tổng lớn nhất'
+  ],
+  duration: (diff) => [300, 480, 600][diff], par: [60, 150, 300],
+  create(s) {
+    window.location.href = 'legv8-leetcode.html';
+    return {
+      mount(stage) {
+        stage.innerHTML = `
+          <div class="center" style="padding: 2rem;">
+            <h2>Đang mở LEGv8 LeetCode Arena...</h2>
+            <p class="muted mt-2">Nếu trình duyệt không tự chuyển hướng, <a href="legv8-leetcode.html" style="color:var(--c-cyan);">bấm vào đây để mở</a>.</p>
+          </div>
+        `;
+      },
+      next() {},
+      focus() {},
+      onKey() {}
+    };
+  }
+};
+
+const GAMES = [
+  GameSprint, GameDecode, GameReverse, GameHunter, GameCoords,
+  GamePow, GameInt, GameALU, GameFloat,
+  GameLEGv8, GameLEGv8Decompile, GameLEGv8LeetCode
+];

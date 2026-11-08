@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEGv8 LeetCode Arena — Luyện Thuật Toán Hợp Ngữ 64-bit Chuẩn LeetCode</title>
+  <meta name="description" content="Nền tảng luyện tập thuật toán và cấu trúc dữ liệu theo phong cách LeetCode bằng hợp ngữ 64-bit ARM/LEGv8: Two Sum, Palindrome, Kadane, Move Zeroes, Bitwise với trình chấm tự động.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/legv8.css">
+</head>
+<body class="legv8-theme">
+  <!-- Dynamic Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <canvas id="fx-canvas"></canvas>
+
+  <div class="legv8-app">
+    <!-- Top Header Navigation with Minigames Mode Selector -->
+    <header class="legv8-header">
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <a href="index.html" class="legv8-brand" title="Quay về K-Map Arena Hub">
+          <div class="legv8-logo-icon" style="background:linear-gradient(135deg, #f59e0b, #ef4444);">LC</div>
+          <div>
+            <div class="legv8-brand-title">LEGv8 LEETCODE</div>
+          </div>
+        </a>
+        <span id="diff-badge" class="badge-diff easy">Easy</span>
+
+        <!-- Mode Nav Switcher -->
+        <nav class="legv8-mode-nav">
+          <a href="legv8.html" title="Chế độ 1: Dịch từ C sang Hợp ngữ LEGv8">
+            <span>⚡ C ➔ LEGv8</span>
+          </a>
+          <a href="legv8-decompile.html" title="Chế độ 2: Dịch từ Hợp ngữ LEGv8 về ngôn ngữ C">
+            <span>🔄 LEGv8 ➔ C</span>
+          </a>
+          <a href="legv8-leetcode.html" class="active" title="Chế độ 3: Luyện thuật toán chuẩn LeetCode bằng LEGv8">
+            <span>🏆 LeetCode</span>
+          </a>
+        </nav>
+        
+        <select id="problem-select" class="legv8-btn" style="padding:0.35rem 0.6rem; max-width:280px; font-weight:700;">
+          <!-- Loaded dynamically -->
+        </select>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="legv8-header-right">
+        <a href="legv8.html" class="legv8-btn" style="text-decoration:none;">
+          📚 Cẩm Nang ABI
+        </a>
+        <a href="index.html" class="legv8-btn" style="text-decoration:none;">
+          ⤺ K-Map Arena
+        </a>
+      </div>
+    </header>
+
+    <!-- Main 3-Column LeetCode Workspace -->
+    <main class="legv8-workspace">
+      <!-- CỘT 1: ĐỀ BÀI LEETCODE & CONSTRAINTS -->
+      <section class="legv8-panel">
+        <div class="panel-head">
+          <span class="panel-title">📋 Đề Bài &amp; Ràng Buộc (Problem Statement)</span>
+        </div>
+        <div class="panel-body" style="padding:1rem;">
+          <h2 id="problem-title" style="font-size:1.1rem; color:#fff; margin-bottom:0.4rem;">Đang tải...</h2>
+          
+          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.8rem;">
+            <span style="font-size:0.75rem; color:#94a3b8;">Tỉ lệ chấp thuận (Acceptance): <b id="acceptance-val" style="color:#10b981;">89%</b></span>
+          </div>
+
+          <div id="tags-container" style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:1rem;">
+            <!-- Tags -->
+          </div>
+
+          <div id="problem-desc" style="font-size:0.82rem; color:#cbd5e1; line-height:1.6; margin-bottom:1.2rem;"></div>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#38bdf8; margin-bottom:0.3rem;">FORMAT HÀM CẦN TRIỂN KHAI:</div>
+          <pre id="signature-card" class="handbook-code" style="margin-bottom:1rem;"></pre>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">ÁNH XẠ THANH GHI (ABI SPEC):</div>
+          <table class="handbook-table" style="margin-bottom:1rem;">
+            <thead>
+              <tr>
+                <th>Thanh ghi</th>
+                <th>Ý nghĩa / Tham số</th>
+              </tr>
+            </thead>
+            <tbody id="abi-table"></tbody>
+          </table>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; margin-bottom:0.4rem;">VÍ DỤ MINH HỌA (EXAMPLES):</div>
+          <div id="examples-container"></div>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; margin-top:1rem; margin-bottom:0.3rem;">RÀNG BUỘC (CONSTRAINTS):</div>
+          <ul id="constraints-list" style="font-size:0.78rem; color:#94a3b8; padding-left:1.2rem; line-height:1.6;"></ul>
+        </div>
+      </section>
+
+      <!-- CỘT 2: TRÌNH SOẠN THẢO LEGv8 CODE -->
+      <section class="legv8-panel editor-panel">
+        <div class="editor-toolbar">
+          <div class="toolbar-left">
+            <button id="btn-run-code" type="button" class="legv8-btn" title="Chạy thử với các bộ test mẫu công khai">
+              ▶ Run Code
+            </button>
+            <button id="btn-submit-code" type="button" class="legv8-btn btn-submit" title="Nộp bài &amp; Chấm toàn bộ test ẩn (Ctrl + Enter)">
+              🚀 Submit (Nộp Bài)
+            </button>
+            <button id="btn-reset-code" type="button" class="legv8-btn" title="Khôi phục lại mã ban đầu">
+              ↺ Reset
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <span style="font-size:0.75rem; color:#64748b; font-family:var(--font-code);">ARMv8 / LEGv8 ASM</span>
+          </div>
+        </div>
+
+        <div class="editor-container">
+          <div id="line-numbers" class="line-numbers">
+            <span>1</span>
+          </div>
+          <textarea id="code-textarea" class="code-editor" spellcheck="false" placeholder="// Viết giải thuật LEGv8 của bạn ở đây..."></textarea>
+        </div>
+      </section>
+
+      <!-- CỘT 3: CONSOLE CHẤM BÀI & KẾT QUẢ THỰC THI -->
+      <section class="legv8-panel inspector-panel">
+        <div class="lc-console-tabs">
+          <button id="tab-sample" type="button" class="lc-tab-btn active">🧪 Testcase Mẫu</button>
+          <button id="tab-submit" type="button" class="lc-tab-btn">📊 Kết Quả Chấm (Submission)</button>
+        </div>
+        <div id="lc-console-output" class="test-console" style="flex:1; overflow-y:auto; padding:0.8rem;">
+          <!-- Loaded dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- LEETCODE ACCEPTED MODAL -->
+  <div id="accepted-modal" class="legv8-overlay">
+    <div class="victory-box" style="border:1px solid #10b981; box-shadow:0 0 35px rgba(16,185,129,0.3);">
+      <div style="font-size:2.8rem; margin-bottom:0.3rem;">🟢</div>
+      <h2 class="victory-title" style="color:#10b981;">ACCEPTED!</h2>
+      <p style="color:#94a3b8; font-size:0.88rem;">Giải thuật LEGv8 của bạn đã vượt qua toàn bộ 100% test cases (bao gồm cả các edge-case kiểm thử ẩn)!</p>
+
+      <div class="score-breakdown">
+        <div class="score-row">
+          <span>Thời gian thực thi (Runtime):</span>
+          <span id="modal-runtime" style="color:#38bdf8;">0 chu kỳ</span>
+        </div>
+        <div class="score-row">
+          <span>Tốc độ CPU:</span>
+          <span id="modal-runtime-percent" style="color:#10b981;">Nhanh hơn 96.8% giải pháp</span>
+        </div>
+        <div class="score-row">
+          <span>Bộ nhớ &amp; Ngăn xếp:</span>
+          <span id="modal-memory-percent" style="color:#34d399;">Khung ngăn xếp bảo tồn 100%</span>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:1rem; margin-top:1rem;">
+        <button id="btn-next-problem" type="button" class="legv8-btn btn-primary" style="padding:0.6rem 1.5rem; font-size:0.95rem; background:linear-gradient(135deg, #059669, #10b981);">
+          Thử Thách Tiếp Theo ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nạp scripts -->
+  <script src="js/legv8-cpu.js"></script>
+  <script src="js/legv8-leetcode.js"></script>
+</body>
+</html>

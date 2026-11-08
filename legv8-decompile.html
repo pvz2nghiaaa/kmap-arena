@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEGv8 Reverse Decompiler — Dịch Hợp Ngữ LEGv8 về Ngôn Ngữ C</title>
+  <meta name="description" content="Minigame giáo dục lập trình dịch ngược: Phân tích mã nguồn Hợp ngữ LEGv8 (ARMv8 64-bit) và tái cấu trúc thành hàm C tương đương với bộ kiểm thử tự động trực tiếp trên trình duyệt.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/legv8.css">
+</head>
+<body class="legv8-theme">
+  <!-- Dynamic Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <canvas id="fx-canvas"></canvas>
+
+  <div class="legv8-app">
+    <!-- Top Header Navigation with Minigames Mode Selector -->
+    <header class="legv8-header">
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <a href="index.html" class="legv8-brand" title="Quay về K-Map Arena Hub">
+          <div class="legv8-logo-icon" style="background:linear-gradient(135deg, #10b981, #0284c7);">DEC</div>
+          <div>
+            <div class="legv8-brand-title">LEGv8 DECOMPILER</div>
+          </div>
+        </a>
+        <span id="tier-badge" class="legv8-tier-badge tier-1">Tier 1</span>
+
+        <!-- Mode Nav Switcher -->
+        <nav class="legv8-mode-nav">
+          <a href="legv8.html" title="Chế độ 1: Dịch từ C sang Hợp ngữ LEGv8">
+            <span>⚡ C ➔ LEGv8</span>
+          </a>
+          <a href="legv8-decompile.html" class="active" title="Chế độ 2: Dịch từ Hợp ngữ LEGv8 về ngôn ngữ C">
+            <span>🔄 LEGv8 ➔ C</span>
+          </a>
+          <a href="legv8-leetcode.html" title="Chế độ 3: Luyện thuật toán chuẩn LeetCode bằng LEGv8">
+            <span>🏆 LeetCode</span>
+          </a>
+        </nav>
+        
+        <select id="level-select" class="legv8-btn" style="padding:0.35rem 0.6rem; max-width:260px; font-weight:700;">
+          <!-- Loaded dynamically -->
+        </select>
+      </div>
+
+      <!-- Center Status -->
+      <div class="legv8-status-center">
+        <div id="timer-box" class="legv8-timer-box" title="Thời gian thử thách của màn chơi">
+          <span>⏱</span>
+          <span id="timer-val">03:00</span>
+        </div>
+
+        <div class="legv8-score-box">
+          <span>ĐIỂM:</span>
+          <b id="total-score-val">0</b>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="legv8-header-right">
+        <button id="toggle-mode-btn" type="button" class="legv8-btn">
+          🧩 Điền Khuyết (Scaffold)
+        </button>
+        <a href="index.html" class="legv8-btn" style="text-decoration:none;">
+          ⤺ K-Map Arena
+        </a>
+      </div>
+    </header>
+
+    <!-- Main 3-Column IDE Workspace -->
+    <main class="legv8-workspace">
+      <!-- CỘT 1: MÃ HỢP NGỮ LEGv8 CẦN DỊCH NGƯỢC -->
+      <section class="legv8-panel">
+        <div class="panel-head">
+          <span class="panel-title">📄 Mã Hợp Ngữ LEGv8 Cần Dịch Ngược</span>
+        </div>
+        <div class="panel-body">
+          <h3 id="level-title" style="font-size:0.95rem; margin-bottom:0.5rem; color:#38bdf8;">Đang tải...</h3>
+          <p id="level-desc" style="font-size:0.8rem; color:#94a3b8; line-height:1.5; margin-bottom:0.8rem;"></p>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; margin-bottom:0.3rem;">MÃ NGUỒN LEGv8 (ASSEMBLY):</div>
+          <div id="asm-code-card" class="c-code-card" style="border-left:3px solid #38bdf8; background:rgba(7,12,23,0.85);">
+            <!-- Loaded dynamically -->
+          </div>
+
+          <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; margin-top:1rem; margin-bottom:0.3rem;">GỢI Ý TÁI CẤU TRÚC:</div>
+          <div id="hints-container" class="hint-accordion">
+            <!-- Hints -->
+          </div>
+
+          <div style="margin-top:1.5rem; padding:0.8rem; background:rgba(30,41,59,0.4); border:1px solid rgba(16,185,129,0.25); border-radius:8px; font-size:0.78rem; color:#94a3b8;">
+            💡 <i><b>Mẹo dịch ngược:</b> Nhận diện phép cộng trừ qua `ADD`/`SUB`, phép nhân 2 qua `LSL #1`, điều kiện nhảy qua `SUBS` + `B.cond` và vòng lặp qua nhãn nhảy `Loop`.</i>
+          </div>
+        </div>
+      </section>
+
+      <!-- CỘT 2: TRÌNH SOẠN THẢO MÃ NGUỒN C -->
+      <section class="legv8-panel editor-panel">
+        <div class="editor-toolbar">
+          <div class="toolbar-left">
+            <button id="btn-run" type="button" class="legv8-btn btn-primary" title="Biên dịch &amp; Chạy thử hàm C của bạn (Ctrl + Enter)">
+              ▶ BIÊN DỊCH &amp; RUN C <kbd style="font-size:0.7rem; background:rgba(0,0,0,0.3); padding:2px 4px; border-radius:3px;">Ctrl+Enter</kbd>
+            </button>
+            <button id="btn-reset" type="button" class="legv8-btn" title="Khôi phục lại mã khởi tạo">
+              ↺ Khôi Phục
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <span style="font-size:0.75rem; color:#64748b; font-family:var(--font-code);">C99 / C11 Standard</span>
+          </div>
+        </div>
+
+        <div class="editor-container">
+          <div id="line-numbers" class="line-numbers">
+            <span>1</span>
+          </div>
+          <textarea id="code-textarea" class="code-editor" spellcheck="false" placeholder="// Viết hàm C tương đương ở đây..."></textarea>
+          <div id="scaffold-view" class="scaffold-editor" style="display:none;"></div>
+        </div>
+      </section>
+
+      <!-- CỘT 3: KẾT QUẢ KIỂM THỬ (TEST CONSOLE) -->
+      <section class="legv8-panel inspector-panel">
+        <div class="panel-head" style="padding:0.6rem 0.8rem; border-bottom:1px solid var(--ide-border);">
+          <span class="panel-title" style="font-size:0.78rem;">🧪 KẾT QUẢ KIỂM THỬ HÀM C (TEST RUNNER CONSOLE)</span>
+        </div>
+        <div id="test-console" class="test-console" style="flex:1; overflow-y:auto; padding:0.8rem;">
+          <!-- Loaded dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- VICTORY OVERLAY MODAL -->
+  <div id="victory-modal" class="legv8-overlay">
+    <div class="victory-box">
+      <div style="font-size:2.8rem; margin-bottom:0.3rem;">🎉</div>
+      <h2 class="victory-title" style="background:linear-gradient(135deg, #34d399, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">DỊCH NGƯỢC XUẤT SẮC!</h2>
+      <p style="color:#94a3b8; font-size:0.88rem;">Hàm C của bạn đã tái cấu trúc chính xác logic của đoạn mã hợp ngữ LEGv8 và vượt qua toàn bộ các bộ kiểm thử!</p>
+
+      <div class="score-breakdown">
+        <div class="score-row">
+          <span>Điểm cơ sở màn chơi:</span>
+          <span id="modal-base-score" style="color:#38bdf8;">+500</span>
+        </div>
+        <div class="score-row">
+          <span>Thưởng thời gian còn lại:</span>
+          <span id="modal-time-bonus" style="color:#10b981;">+0</span>
+        </div>
+        <div class="score-row">
+          <span>Phạt số lần nộp sai:</span>
+          <span id="modal-penalty" style="color:#f43f5e;">-0</span>
+        </div>
+        <div class="score-row total">
+          <span>TỔNG ĐIỂM ĐẠT ĐƯỢC:</span>
+          <span id="modal-total-score">+500</span>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:1rem;">
+        <button id="btn-next-level" type="button" class="legv8-btn btn-primary" style="padding:0.6rem 1.5rem; font-size:0.95rem;">
+          Màn Tiếp Theo ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nạp scripts -->
+  <script src="js/legv8-decompile.js"></script>
+</body>
+</html>

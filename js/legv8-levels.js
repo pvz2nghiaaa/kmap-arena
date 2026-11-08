@@ -1124,6 +1124,381 @@ BaseOne:
       'Gợi ý 2: Khung Stack 32 bytes: [SP, #24]=LR, [SP, #16]=n, [SP, #8]=r, [SP, #0]=kết quả nhánh 1.',
       'Gợi ý 3: Sau khi nhánh 1 trả về kết quả trong X0, lưu ngay vào `[SP, #0]` trước khi phục hồi n và r để chuẩn bị cho nhánh 2.'
     ]
+  },
+
+  /* =========================================================================
+     TIER 2 BỔ SUNG: DỮ LIỆU ĐA KÍCH THƯỚC (32-BIT INT & 16-BIT SHORT)
+     ========================================================================= */
+  {
+    id: 'tier2_32bit_array_sum',
+    level_id: 'tier2_32bit_array_sum',
+    tier: 2,
+    title: 'Tính Tổng Mảng int 32-bit (LDURSW & LSL #2)',
+    difficulty: 'Medium',
+    time_limit: 240,
+    time_limit_seconds: 240,
+    base_score: 600,
+    isProcedure: true,
+    c_code: `// Tính tổng các phần tử của mảng int 32-bit có kích thước n
+int sum_array(int A[], int n) {
+    int sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum += A[i];
+    }
+    return sum;
+}`,
+    desc: 'Vì kiểu int là 32-bit (4 bytes), byte offset = i * 4 (dùng LSL #2). Sử dụng lệnh LDURSW để nạp 32-bit từ bộ nhớ và tự động mở rộng dấu (sign-extend) lên thanh ghi 64-bit.',
+    register_map: [
+      { var: 'A (con trỏ mảng)', reg: 'X0', role: 'Địa chỉ cơ sở mảng int' },
+      { var: 'n (số phần tử)', reg: 'X1', role: 'Kích thước mảng' },
+      { var: 'sum (kết quả)', reg: 'X0', role: 'Giá trị trả về' },
+      { var: 'i (biến đếm)', reg: 'X9', role: 'Biến lặp' },
+      { var: 'sum tạm', reg: 'X10', role: 'Thanh ghi cộng dồn' }
+    ],
+    starter_code: `sum_array:
+    ORR   X9, XZR, XZR       // i = 0
+    ORR   X10, XZR, XZR      // sum = 0
+Loop:
+    SUBS  XZR, X9, X1        // So sánh i với n
+    B.GE  Exit               // Nếu i >= n -> Thoát
+
+    // TODO: Tính byte offset của A[i] (int 32-bit: LSL #2)
+    // Nạp dữ liệu bằng LDURSW và cộng dồn vào X10
+    
+Exit:
+    ORR   X0, XZR, X10       // Trả về kết quả qua X0
+    BR    LR
+`,
+    solution_code: `sum_array:
+    ORR   X9, XZR, XZR
+    ORR   X10, XZR, XZR
+Loop:
+    SUBS  XZR, X9, X1
+    B.GE  Exit
+    LSL   X11, X9, #2
+    ADD   X11, X0, X11
+    LDURSW X12, [X11, #0]
+    ADD   X10, X10, X12
+    ADDI  X9, X9, #1
+    B     Loop
+Exit:
+    ORR   X0, XZR, X10
+    BR    LR`,
+    test_cases: [
+      { params: [0x1000, 4], data_width: 4, memory: { '0x1000': 10, '0x1004': 20, '0x1008': -5, '0x100C': 15 }, targetReg: 'X0', expected: 40, label: 'Bộ kiểm thử #1' },
+      { params: [0x2000, 3], data_width: 4, memory: { '0x2000': 100, '0x2004': -150, '0x2008': 50 }, targetReg: 'X0', expected: 0, label: 'Bộ kiểm thử #2' }
+    ],
+    hints: [
+      'Gợi ý 1: Vì kiểu int là 32-bit (4 bytes), byte offset = i * 4. Hãy dùng lệnh LSL X11, X9, #2.',
+      'Gợi ý 2: Dùng lệnh LDURSW để nạp 32-bit từ bộ nhớ và tự động mở rộng dấu (sign-extend) lên thanh ghi 64-bit.'
+    ]
+  },
+
+  {
+    id: 'tier2_16bit_halfword_scale',
+    level_id: 'tier2_16bit_halfword_scale',
+    tier: 2,
+    title: 'Nhân Đôi Phần Tử Mảng short 16-bit (LDURH & STURH)',
+    difficulty: 'Medium',
+    time_limit: 240,
+    time_limit_seconds: 240,
+    base_score: 600,
+    isProcedure: true,
+    c_code: `// Gấp đôi giá trị phần tử thứ i trong mảng 16-bit: A[i] = A[i] * 2
+void double_element(short A[], long long i) {
+    A[i] = A[i] * 2;
+}`,
+    desc: 'Thao tác trên dữ liệu short 16-bit (halfword, 2 bytes). Tính byte offset = i * 2 bằng LSL #1. Nạp bằng LDURH, nhân 2 bằng LSL #1 và lưu lại bằng STURH.',
+    register_map: [
+      { var: 'A (con trỏ mảng 16-bit)', reg: 'X0', role: 'Địa chỉ mảng' },
+      { var: 'i (chỉ số phần tử)', reg: 'X1', role: 'Chỉ số phần tử' }
+    ],
+    starter_code: `double_element:
+    // TODO: Tính byte offset của short 16-bit (2 bytes: LSL #1)
+    // Nạp bằng LDURH, nhân đôi (LSL #1), rồi lưu lại bằng STURH
+
+    BR    LR
+`,
+    solution_code: `double_element:
+    LSL   X9, X1, #1
+    ADD   X9, X0, X9
+    LDURH X10, [X9, #0]
+    LSL   X10, X10, #1
+    STURH X10, [X9, #0]
+    BR    LR`,
+    test_cases: [
+      { params: [0x1000, 2], data_width: 2, memory: { '0x1000': 50, '0x1002': 100, '0x1004': 300 }, expected_memory: { '0x1004': 600 }, label: 'Bộ kiểm thử #1' },
+      { params: [0x2000, 0], data_width: 2, memory: { '0x2000': 25, '0x2002': 75 }, expected_memory: { '0x2000': 50 }, label: 'Bộ kiểm thử #2' }
+    ],
+    hints: [
+      'Gợi ý 1: short chiếm 2 bytes, do đó offset = i * 2 (dùng LSL X9, X1, #1).',
+      'Gợi ý 2: Lưu ý dùng cặp lệnh đúng kích cỡ: nạp bằng LDURH và lưu lại bằng STURH.'
+    ]
+  },
+
+  /* =========================================================================
+     TIER 3 BỔ SUNG: DỮ LIỆU CHUỖI KÝ TỰ (STRING - 8-BIT CHAR)
+     ========================================================================= */
+  {
+    id: 'tier3_string_strlen',
+    level_id: 'tier3_string_strlen',
+    tier: 3,
+    title: 'Tính Độ Dài Chuỗi Ký Tự (strlen với LDURB & CBZ)',
+    difficulty: 'Medium',
+    time_limit: 300,
+    time_limit_seconds: 300,
+    base_score: 700,
+    isProcedure: true,
+    c_code: `long long my_strlen(char *s) {
+    long long len = 0;
+    while (s[len] != '\\0') {
+        len++;
+    }
+    return len;
+}`,
+    desc: 'Mỗi ký tự char chiếm đúng 1 byte (8-bit). Byte offset bằng đúng len, cộng trực tiếp Base + len mà KHÔNG cần dịch bit. Nạp ký tự bằng LDURB và kiểm tra ký tự kết thúc chuỗi "\\0" (giá trị 0) bằng lệnh CBZ.',
+    register_map: [
+      { var: 's (con trỏ chuỗi)', reg: 'X0', role: 'Địa chỉ chuỗi ký tự' },
+      { var: 'len (kết quả trả về)', reg: 'X0', role: 'Độ dài chuỗi' },
+      { var: 'biến đếm nội bộ', reg: 'X9', role: 'Biến đếm độ dài' }
+    ],
+    starter_code: `my_strlen:
+    ORR   X9, XZR, XZR       // len = 0
+Loop_len:
+    // TODO: Nạp ký tự s[len] bằng LDURB (chú ý: char 1-byte không cần dịch bit!)
+    // Kiểm tra ký tự '\\0' bằng CBZ để thoát khỏi vòng lặp
+
+Exit_len:
+    ORR   X0, XZR, X9        // Gán kết quả vào X0
+    BR    LR
+`,
+    solution_code: `my_strlen:
+    ORR   X9, XZR, XZR
+Loop_len:
+    ADD   X10, X0, X9
+    LDURB X11, [X10, #0]
+    CBZ   X11, Exit_len
+    ADDI  X9, X9, #1
+    B     Loop_len
+Exit_len:
+    ORR   X0, XZR, X9
+    BR    LR`,
+    test_cases: [
+      { params: [0x1000], memory: { '0x1000': 'LEGv8' }, targetReg: 'X0', expected: 5, label: 'Bộ kiểm thử #1 ("LEGv8")' },
+      { params: [0x2000], memory: { '0x2000': '' }, targetReg: 'X0', expected: 0, label: 'Bộ kiểm thử #2 (Chuỗi rỗng)' },
+      { params: [0x3000], memory: { '0x3000': 'Hello World!' }, targetReg: 'X0', expected: 12, label: 'Bộ kiểm thử #3 ("Hello World!")' }
+    ],
+    hints: [
+      'Gợi ý 1: Vì char chiếm đúng 1 byte, địa chỉ của s[len] chỉ là X0 + len, KHÔNG được nhân hay dịch trái!',
+      'Gợi ý 2: Dùng CBZ X11, Exit_len để nhảy ra ngoài ngay khi ký tự nạp vào có giá trị bằng 0.'
+    ]
+  },
+
+  /* =========================================================================
+     TIER 4 BỔ SUNG: SAO CHÉP CHUỖI & QUẢN LÝ CALLEE-SAVED
+     ========================================================================= */
+  {
+    id: 'tier4_string_strcpy',
+    level_id: 'tier4_string_strcpy',
+    tier: 4,
+    title: 'Sao Chép Chuỗi Ký Tự (strcpy & Bảo Tồn Callee-saved X19)',
+    difficulty: 'Hard',
+    time_limit: 360,
+    time_limit_seconds: 360,
+    base_score: 800,
+    isProcedure: true,
+    c_code: `void my_strcpy(char x[], char y[]) {
+    size_t i = 0;
+    while ((x[i] = y[i]) != '\\0') {
+        i++;
+    }
+}`,
+    desc: 'Sao chép chuỗi nguồn y vào chuỗi đích x. Phép gán x[i] = y[i] được thực hiện trước khi kiểm tra ký tự "\\0" để đảm bảo ký tự kết thúc chuỗi cũng được sao chép. Nếu dùng thanh ghi Callee-saved X19 làm biến đếm i, bắt buộc phải lưu vào Stack và khôi phục trước khi thoát.',
+    register_map: [
+      { var: 'x (chuỗi đích)', reg: 'X0', role: 'Địa chỉ chuỗi đích' },
+      { var: 'y (chuỗi nguồn)', reg: 'X1', role: 'Địa chỉ chuỗi nguồn' },
+      { var: 'i', reg: 'X19', role: 'Chỉ số (lưu vào Stack)' }
+    ],
+    starter_code: `my_strcpy:
+    SUBI  SP, SP, #16        // Cấp phát Stack bảo tồn X19
+    STUR  X19, [SP, #0]
+    ORR   X19, XZR, XZR      // i = 0
+Loop_cpy:
+    // TODO: Nạp y[i] bằng LDURB, ghi vào x[i] bằng STURB
+    // Kiểm tra thoát nếu byte vừa lưu là '\\0'
+
+Exit_cpy:
+    LDUR  X19, [SP, #0]      // Khôi phục X19
+    ADDI  SP, SP, #16        // Giải phóng Stack
+    BR    LR
+`,
+    solution_code: `my_strcpy:
+    SUBI  SP, SP, #16
+    STUR  X19, [SP, #0]
+    ORR   X19, XZR, XZR
+Loop_cpy:
+    ADD   X10, X1, X19
+    LDURB X11, [X10, #0]
+    ADD   X12, X0, X19
+    STURB X11, [X12, #0]
+    CBZ   X11, Exit_cpy
+    ADDI  X19, X19, #1
+    B     Loop_cpy
+Exit_cpy:
+    LDUR  X19, [SP, #0]
+    ADDI  SP, SP, #16
+    BR    LR`,
+    test_cases: [
+      { params: [0x1000, 0x2000], memory: { '0x2000': 'ARMv8_Rulez' }, expected_memory: { '0x1000': 'ARMv8_Rulez' }, label: 'Bộ kiểm thử #1' },
+      { params: [0x3000, 0x4000], memory: { '0x4000': 'KMap' }, expected_memory: { '0x3000': 'KMap' }, label: 'Bộ kiểm thử #2' }
+    ],
+    hints: [
+      'Gợi ý 1: Phép gán x[i] = y[i] phải được thực hiện TRƯỚC KHI kiểm tra điều kiện thoát, để đảm bảo ký tự "\\0" cũng được sao chép sang chuỗi đích.',
+      'Gợi ý 2: Dùng STURB để ghi đúng 1 byte sang x[i].'
+    ]
+  },
+
+  /* =========================================================================
+     TIER 5 BỔ SUNG: CHƯƠNG TRÌNH C TOÀN DIỆN VỚI HÀM MAIN & LỒNG NHAU ĐA CẤP
+     ========================================================================= */
+  {
+    id: 'tier5_complete_c_pipeline',
+    level_id: 'tier5_complete_c_pipeline',
+    tier: 5,
+    title: 'Chương Trình C Hoàn Chỉnh: main, Duyệt Mảng & Lời Gọi Lồng Nhau',
+    difficulty: 'Master',
+    time_limit: 600,
+    time_limit_seconds: 600,
+    base_score: 2500,
+    isProcedure: true,
+    c_code: `// Hàm lá: biến đổi giá trị x
+long long transform(long long x) {
+    return (x * 3) + 5;
+}
+
+// Hàm duyệt mảng: lặp qua n phần tử, gọi transform và cộng dồn có điều kiện (> 20)
+long long process_array(long long A[], long long n) {
+    long long sum = 0;
+    for (long long i = 0; i < n; i++) {
+        long long val = transform(A[i]);
+        if (val > 20) {
+            sum += val;
+        }
+    }
+    return sum;
+}
+
+// Hàm main chuẩn C: cấp phát mảng cục bộ trên Stack, gọi process_array và trả về kết quả
+long long main() {
+    long long data[4] = { 2, 6, 8, 3 };
+    return process_array(data, 4);
+}`,
+    desc: 'Đỉnh cao của kiến trúc máy tính: Mô phỏng đầy đủ cấu trúc một chương trình C thực thụ. Hàm main cấp phát mảng cục bộ trên khung ngăn xếp, gọi hàm process_array; hàm process_array duyệt mảng bằng vòng lặp và gọi hàm lá transform bên trong vòng lặp. Đòi hỏi quản lý hoàn hảo nhiều tầng Stack Frame, bảo tồn con trỏ LR và các thanh ghi Callee-saved X19–X22.',
+    register_map: [
+      { var: 'main SP Frame', reg: 'SP', role: 'Khung Stack 48 bytes chứa mảng data[4] và LR' },
+      { var: 'process_array Frame', reg: 'SP', role: 'Khung Stack 48 bytes bảo tồn LR và X19..X22' },
+      { var: 'A (con trỏ mảng)', reg: 'X19', role: 'Callee-saved trong process_array' },
+      { var: 'n (số phần tử)', reg: 'X20', role: 'Callee-saved trong process_array' },
+      { var: 'i (chỉ số lặp)', reg: 'X21', role: 'Callee-saved trong process_array' },
+      { var: 'sum (tổng kết quả)', reg: 'X22', role: 'Callee-saved trong process_array' }
+    ],
+    starter_code: `main:
+    // Cấp phát Stack Frame (48 bytes: bội số 16)
+    // Lưu LR vào [SP, #32]
+    // Khởi tạo mảng cục bộ data[4] = { 2, 6, 8, 3 } tại [SP, #0]..[SP, #24]
+    // Gọi process_array(data, 4) với X0 = SP, X1 = 4
+    // Khôi phục LR, giải phóng Stack, BR LR
+    BR    LR
+
+process_array:
+    // Cấp phát Stack Frame (48 bytes) bảo tồn LR và X19..X22
+    // Lưu tham số A, n vào X19, X20; khởi tạo i (X21) = 0, sum (X22) = 0
+    // Vòng lặp: nạp A[i], gọi BL transform
+    // Nếu kết quả > 20 thì cộng dồn vào sum
+    // Khôi phục các thanh ghi, giải phóng Stack, BR LR
+    BR    LR
+
+transform:
+    // Hàm lá: tính (x * 3) + 5
+    ADDI  X9,  XZR, #3
+    MUL   X0,  X0,  X9
+    ADDI  X0,  X0,  #5
+    BR    LR
+`,
+    solution_code: `main:
+    SUBI  SP, SP, #48
+    STUR  X30, [SP, #32]
+    
+    ADDI  X9,  XZR, #2
+    STUR  X9,  [SP, #0]
+    ADDI  X9,  XZR, #6
+    STUR  X9,  [SP, #8]
+    ADDI  X9,  XZR, #8
+    STUR  X9,  [SP, #16]
+    ADDI  X9,  XZR, #3
+    STUR  X9,  [SP, #24]
+    
+    ADDI  X0,  SP,  #0
+    ADDI  X1,  XZR, #4
+    BL    process_array
+    
+    LDUR  X30, [SP, #32]
+    ADDI  SP, SP, #48
+    BR    LR
+
+process_array:
+    SUBI  SP, SP, #48
+    STUR  X30, [SP, #40]
+    STUR  X19, [SP, #32]
+    STUR  X20, [SP, #24]
+    STUR  X21, [SP, #16]
+    STUR  X22, [SP, #8]
+    
+    ADDI  X19, X0,  #0
+    ADDI  X20, X1,  #0
+    ADDI  X21, XZR, #0
+    ADDI  X22, XZR, #0
+    
+Loop_proc:
+    SUBS  XZR, X21, X20
+    B.GE  Done_proc
+    
+    LSL   X9,  X21, #3
+    ADD   X9,  X19, X9
+    LDUR  X0,  [X9, #0]
+    BL    transform
+    
+    SUBIS XZR, X0, #20
+    B.LE  Skip_add
+    ADD   X22, X22, X0
+    
+Skip_add:
+    ADDI  X21, X21, #1
+    B     Loop_proc
+    
+Done_proc:
+    ADDI  X0,  X22, #0
+    LDUR  X22, [SP, #8]
+    LDUR  X21, [SP, #16]
+    LDUR  X20, [SP, #24]
+    LDUR  X19, [SP, #32]
+    LDUR  X30, [SP, #40]
+    ADDI  SP, SP, #48
+    BR    LR
+
+transform:
+    ADDI  X9,  XZR, #3
+    MUL   X0,  X0,  X9
+    ADDI  X0,  X0,  #5
+    BR    LR`,
+    test_cases: [
+      { params: [], targetReg: 'X0', expected: 52, label: 'Bộ kiểm thử #1 (main return = 52)' }
+    ],
+    hints: [
+      'Gợi ý 1: Trong main, cấp phát 48 bytes trên Stack: [SP, #32] cho LR, các vị trí [SP, #0], [SP, #8], [SP, #16], [SP, #24] chứa 4 phần tử data.',
+      'Gợi ý 2: Truyền con trỏ mảng data cho process_array bằng lệnh `ADDI X0, SP, #0`.',
+      'Gợi ý 3: Vì process_array gọi BL transform bên trong vòng lặp, bắt buộc phải bảo tồn biến đếm i, con trỏ mảng và tổng sum trong các thanh ghi Callee-saved X19..X22!'
+    ]
   }
 ];
 

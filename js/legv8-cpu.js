@@ -92,6 +92,7 @@ const LEGv8 = (() => {
       'AND', 'ORR', 'EOR', 'ANDI', 'ORRI', 'EORI',
       'LSL', 'LSR',
       'LDUR', 'STUR',
+      'LDURB', 'STURB', 'LDURH', 'STURH', 'LDURSW', 'STURW',
       'B', 'B.EQ', 'B.NE', 'B.LT', 'B.LE', 'B.GT', 'B.GE',
       'B.HI', 'B.HS', 'B.LO', 'B.LS',
       'CBZ', 'CBNZ',
@@ -219,8 +220,9 @@ const LEGv8 = (() => {
       return instr;
     }
 
-    // 3. Nhóm bộ nhớ: LDUR Rt, [Rn, #offset] | STUR Rt, [Rn, #offset]
-    if (opcode === 'LDUR' || opcode === 'STUR') {
+    // 3. Nhóm bộ nhớ (D-Format): LDUR, STUR, LDURB, STURB, LDURH, STURH, LDURSW, STURW
+    const MEM_OPCODES = new Set(['LDUR', 'STUR', 'LDURB', 'STURB', 'LDURH', 'STURH', 'LDURSW', 'STURW']);
+    if (MEM_OPCODES.has(opcode)) {
       const commaIdx = operandStr.indexOf(',');
       if (commaIdx === -1) throw new ParseError(lineNo, `Lệnh '${opcode}' thiếu dấu phẩy phân cách: ${opcode} Rt, [Rn, #offset]`);
       instr.rt = checkReg(operandStr.substring(0, commaIdx).trim());
@@ -397,16 +399,90 @@ const LEGv8 = (() => {
       this.registers.set(r, signedVal);
     }
 
-    // Đọc ô nhớ 64-bit (8 bytes aligned)
-    readMem(address) {
-      const addr = BigInt(address) & ~7n; // Căn lề 8 bytes
-      return this.memory.get(addr) ?? 0n;
+    // Bộ nhớ RAM byte-level
+    readByte(addr) {
+      return this.memory.get(BigInt(addr)) ?? 0;
     }
 
-    // Ghi ô nhớ 64-bit (8 bytes aligned)
+    writeByte(addr, val) {
+      this.memory.set(BigInt(addr), Number(val) & 0xFF);
+    }
+
+    // Đọc 1 byte không dấu (unsigned 8-bit)
+    readMem8(address) {
+      return BigInt(this.readByte(address));
+    }
+
+    // Ghi 1 byte (8-bit)
+    writeMem8(address, val) {
+      this.writeByte(address, Number(BigInt(val) & 0xFFn));
+    }
+
+    // Đọc 2 bytes không dấu (unsigned 16-bit little-endian)
+    readMem16(address) {
+      const a = BigInt(address);
+      const b0 = BigInt(this.readByte(a));
+      const b1 = BigInt(this.readByte(a + 1n));
+      return (b1 << 8n) | b0;
+    }
+
+    // Ghi 2 bytes (16-bit little-endian)
+    writeMem16(address, val) {
+      const a = BigInt(address);
+      const v = BigInt(val);
+      this.writeByte(a, Number(v & 0xFFn));
+      this.writeByte(a + 1n, Number((v >> 8n) & 0xFFn));
+    }
+
+    // Đọc 4 bytes có dấu (signed 32-bit little-endian, sign-extended sang 64-bit)
+    readMem32(address) {
+      const a = BigInt(address);
+      const b0 = this.readByte(a);
+      const b1 = this.readByte(a + 1n);
+      const b2 = this.readByte(a + 2n);
+      const b3 = this.readByte(a + 3n);
+      const u32 = (b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)) >>> 0;
+      const s32 = (u32 << 0); // ép kiểu 32-bit có dấu trong JS
+      return BigInt(s32);
+    }
+
+    // Ghi 4 bytes (32-bit little-endian)
+    writeMem32(address, val) {
+      const a = BigInt(address);
+      const v = BigInt(val);
+      this.writeByte(a, Number(v & 0xFFn));
+      this.writeByte(a + 1n, Number((v >> 8n) & 0xFFn));
+      this.writeByte(a + 2n, Number((v >> 16n) & 0xFFn));
+      this.writeByte(a + 3n, Number((v >> 24n) & 0xFFn));
+    }
+
+    // Đọc ô nhớ 64-bit (8 bytes little-endian)
+    readMem64(address) {
+      const a = BigInt(address);
+      let u64 = 0n;
+      for (let i = 0n; i < 8n; i++) {
+        u64 |= BigInt(this.readByte(a + i)) << (i * 8n);
+      }
+      return toSigned64(u64);
+    }
+
+    // Ghi ô nhớ 64-bit (8 bytes little-endian)
+    writeMem64(address, val) {
+      const a = BigInt(address);
+      const v = toUnsigned64(val);
+      for (let i = 0n; i < 8n; i++) {
+        this.writeByte(a + i, Number((v >> (i * 8n)) & 0xFFn));
+      }
+    }
+
+    // Đọc ô nhớ 64-bit mặc định (tương thích ngược)
+    readMem(address) {
+      return this.readMem64(address);
+    }
+
+    // Ghi ô nhớ 64-bit mặc định (tương thích ngược)
     writeMem(address, val) {
-      const addr = BigInt(address) & ~7n;
-      this.memory.set(addr, toSigned64(val));
+      this.writeMem64(address, val);
     }
 
     // Cập nhật cờ điều kiện N, Z, C, V theo kết quả phép tính 64-bit
@@ -583,7 +659,7 @@ const LEGv8 = (() => {
         }
         case 'LDUR': {
           const addr = this.getReg(instr.rn) + instr.offset;
-          const val = this.readMem(addr);
+          const val = this.readMem64(addr);
           this.setReg(instr.rt, val);
           modifiedReg = instr.rt;
           break;
@@ -591,8 +667,50 @@ const LEGv8 = (() => {
         case 'STUR': {
           const addr = this.getReg(instr.rn) + instr.offset;
           const val = this.getReg(instr.rt);
-          this.writeMem(addr, val);
-          memWrite = { addr, val, rt: instr.rt };
+          this.writeMem64(addr, val);
+          memWrite = { addr, val, rt: instr.rt, width: 8 };
+          break;
+        }
+        case 'LDURB': {
+          const addr = this.getReg(instr.rn) + instr.offset;
+          const val = this.readMem8(addr);
+          this.setReg(instr.rt, val);
+          modifiedReg = instr.rt;
+          break;
+        }
+        case 'STURB': {
+          const addr = this.getReg(instr.rn) + instr.offset;
+          const val = this.getReg(instr.rt);
+          this.writeMem8(addr, val);
+          memWrite = { addr, val: val & 0xFFn, rt: instr.rt, width: 1 };
+          break;
+        }
+        case 'LDURH': {
+          const addr = this.getReg(instr.rn) + instr.offset;
+          const val = this.readMem16(addr);
+          this.setReg(instr.rt, val);
+          modifiedReg = instr.rt;
+          break;
+        }
+        case 'STURH': {
+          const addr = this.getReg(instr.rn) + instr.offset;
+          const val = this.getReg(instr.rt);
+          this.writeMem16(addr, val);
+          memWrite = { addr, val: val & 0xFFFFn, rt: instr.rt, width: 2 };
+          break;
+        }
+        case 'LDURSW': {
+          const addr = this.getReg(instr.rn) + instr.offset;
+          const val = this.readMem32(addr);
+          this.setReg(instr.rt, val);
+          modifiedReg = instr.rt;
+          break;
+        }
+        case 'STURW': {
+          const addr = this.getReg(instr.rn) + instr.offset;
+          const val = this.getReg(instr.rt);
+          this.writeMem32(addr, val);
+          memWrite = { addr, val: val & 0xFFFFFFFFn, rt: instr.rt, width: 4 };
           break;
         }
         case 'B': {
@@ -680,7 +798,21 @@ const LEGv8 = (() => {
       // Nạp bộ nhớ mảng / RAM ảo
       if (testCase.memory) {
         for (const [addrStr, memVal] of Object.entries(testCase.memory)) {
-          this.writeMem(BigInt(addrStr), BigInt(memVal));
+          const addr = BigInt(addrStr);
+          if (typeof memVal === 'string') {
+            for (let c = 0; c < memVal.length; c++) {
+              this.writeMem8(addr + BigInt(c), BigInt(memVal.charCodeAt(c)));
+            }
+            if (!memVal.endsWith('\0')) {
+              this.writeMem8(addr + BigInt(memVal.length), 0n);
+            }
+          } else {
+            const width = testCase.data_width || 8;
+            if (width === 1) this.writeMem8(addr, BigInt(memVal));
+            else if (width === 2) this.writeMem16(addr, BigInt(memVal));
+            else if (width === 4) this.writeMem32(addr, BigInt(memVal));
+            else this.writeMem64(addr, BigInt(memVal));
+          }
         }
       }
 
@@ -738,15 +870,43 @@ const LEGv8 = (() => {
 
       if (testCase.expected_memory) {
         for (const [addrStr, expM] of Object.entries(testCase.expected_memory)) {
-          const actM = this.readMem(BigInt(addrStr));
-          if (actM !== BigInt(expM)) {
-            passed = false;
-            memDiff = {
-              address: addrStr,
-              expected: BigInt(expM).toString(),
-              actual: actM.toString()
-            };
-            break;
+          const addr = BigInt(addrStr);
+          if (typeof expM === 'string') {
+            let s = '';
+            let ptr = addr;
+            while (true) {
+              const b = Number(this.readMem8(ptr));
+              if (b === 0) break;
+              s += String.fromCharCode(b);
+              ptr += 1n;
+              if (s.length > 2000) break;
+            }
+            if (s !== expM) {
+              passed = false;
+              memDiff = {
+                address: addrStr,
+                expected: `"${expM}"`,
+                actual: `"${s}"`
+              };
+              break;
+            }
+          } else {
+            const width = testCase.data_width || 8;
+            let actM;
+            if (width === 1) actM = this.readMem8(addr);
+            else if (width === 2) actM = this.readMem16(addr);
+            else if (width === 4) actM = this.readMem32(addr);
+            else actM = this.readMem64(addr);
+
+            if (actM !== BigInt(expM)) {
+              passed = false;
+              memDiff = {
+                address: addrStr,
+                expected: BigInt(expM).toString(),
+                actual: actM.toString()
+              };
+              break;
+            }
           }
         }
       } else {

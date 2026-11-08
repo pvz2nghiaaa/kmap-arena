@@ -843,3 +843,101 @@ body.legv8-theme {
   margin: 0.6rem 0;
   white-space: pre-wrap;
 }
+
+/* ==========================================================================
+   MINIGAMES MODE SWITCHER & SHARED TOP NAVIGATION
+   ========================================================================== */
+.legv8-mode-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 3px 5px;
+  border-radius: 8px;
+  border: 1px solid var(--ide-border);
+}
+
+.legv8-mode-nav a {
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.legv8-mode-nav a:hover {
+  color: #fff;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.legv8-mode-nav a.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.4), rgba(139, 92, 246, 0.4));
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+/* Difficulty Badges */
+.badge-diff {
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-diff.easy { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+.badge-diff.medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+.badge-diff.hard { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.7rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+/* LeetCode Testcase Console */
+.lc-console-tabs {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(10, 15, 29, 0.9);
+  border-bottom: 1px solid var(--ide-border);
+}
+.lc-tab-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 0.3rem 0.7rem;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lc-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+.lc-tab-btn.active { color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); }
+
+/* Run / Submit buttons */
+.btn-submit {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+.btn-submit:hover {
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.6);
+  transform: translateY(-1px);
+}
+
