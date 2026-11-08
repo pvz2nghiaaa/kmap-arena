@@ -14,9 +14,9 @@ const DECOMPILE_LEVELS = [
     time_limit: 180,
     base_score: 500,
     legv8_code: `// Ánh xạ thanh ghi: a: X19, b: X20, c: X21, f: X9
-ADD   X9,  X19, X20    // X9 = a + b
-ADDI  X10, X21, #35    // X10 = c + 35
-SUB   X9,  X9,  X10    // X9 = (a + b) - (c + 35)`,
+ADD   X9,  X19, X20
+ADDI  X10, X21, #35
+SUB   X9,  X9,  X10`,
     desc: 'Quan sát các lệnh hợp ngữ LEGv8 bên trái. Hoàn thành hàm C tương đương nhận vào 3 tham số a, b, c và trả về giá trị của f.',
     function_signature: 'long long calc(long long a, long long b, long long c)',
     starter_c_code: `long long calc(long long a, long long b, long long c) {
@@ -43,9 +43,9 @@ SUB   X9,  X9,  X10    // X9 = (a + b) - (c + 35)`,
       { params: [0, 35, 0], expected: 0, label: 'Bộ kiểm thử #3' }
     ],
     hints: [
-      'Lệnh `ADD X9, X19, X20` tương đương phép cộng `(a + b)`.',
-      'Lệnh `ADDI X10, X21, #35` tương đương `(c + 35)`.',
-      'Lệnh `SUB X9, X9, X10` thực hiện trừ hai biểu thức trên.'
+      'Lệnh `ADD X9, X19, X20` thực hiện phép cộng trên hai tham số tương ứng.',
+      'Lệnh `ADDI X10, X21, #35` thực hiện phép cộng biến c với một hằng số.',
+      'Lệnh `SUB X9, X9, X10` thực hiện trừ kết quả của hai biểu thức.'
     ]
   },
 
@@ -55,12 +55,12 @@ SUB   X9,  X9,  X10    // X9 = (a + b) - (c + 35)`,
     title: 'Dịch Ngược Dịch Trái & Nhân: LSL #1',
     time_limit: 180,
     base_score: 550,
-    legv8_code: `// Ánh xạ: x: X19, y: X20, z: X21, result: X9
-SUB   X9,  X19, X20    // X9 = x - y
-LSL   X9,  X9,  #1     // X9 = (x - y) * 2
-ADDI  X10, X21, #10    // X10 = z + 10
-ADD   X9,  X9,  X10    // X9 = 2 * (x - y) + (z + 10)`,
-    desc: 'Lệnh dịch trái 1 bit `LSL #1` trong kiến trúc nhị phân tương đương phép nhân với 2 (hoặc 2 * expr). Dịch ngược toàn bộ chuỗi tính toán.',
+    legv8_code: `// Ánh xạ thanh ghi: x: X19, y: X20, z: X21, result: X9
+SUB   X9,  X19, X20
+LSL   X9,  X9,  #1
+ADDI  X10, X21, #10
+ADD   X9,  X9,  X10`,
+    desc: 'Lệnh dịch trái bit `LSL #1` trong kiến trúc máy tính tương đương phép biến đổi số học nào? Hãy phân tích toàn bộ chuỗi tính toán.',
     function_signature: 'long long compute(long long x, long long y, long long z)',
     starter_c_code: `long long compute(long long x, long long y, long long z) {
     // Viết mã C tương đương ở đây...
@@ -85,8 +85,8 @@ ADD   X9,  X9,  X10    // X9 = 2 * (x - y) + (z + 10)`,
       { params: [3, 7, 20], expected: 22, label: 'Bộ kiểm thử #3' }
     ],
     hints: [
-      'Dịch trái 1 bit `LSL X9, X9, #1` chính là phép toán `2 * (x - y)`.',
-      'Sau đó cộng tiếp với `(z + 10)`.'
+      'Dịch trái 1 bit (`LSL #1`) một giá trị nhị phân chính là nhân giá trị đó với 2.',
+      'Chú ý thứ tự thực hiện phép trừ trước, nhân 2, sau đó cộng kết quả với biểu thức chứa z.'
     ]
   },
 
@@ -96,14 +96,14 @@ ADD   X9,  X9,  X10    // X9 = 2 * (x - y) + (z + 10)`,
     title: 'Dịch Ngược Thao Tác Mảng: Hoán Đổi Hai Phần Tử Liền Kề',
     time_limit: 240,
     base_score: 700,
-    legv8_code: `// A: X10 (địa chỉ cơ sở), i: X19
-LSL   X11, X19, #3     // X11 = i * 8 (độ dời byte của A[i])
-ADD   X11, X10, X11    // X11 = &A[i]
-LDUR  X9,  [X11, #0]   // X9 = A[i]
-LDUR  X12, [X11, #8]   // X12 = A[i + 1]
-STUR  X12, [X11, #0]   // A[i] = X12
-STUR  X9,  [X11, #8]   // A[i + 1] = X9`,
-    desc: 'Đoạn mã nạp 2 phần tử liên tiếp A[i] và A[i + 1] từ bộ nhớ, sau đó ghi ngược lại vị trí của nhau. Hãy viết hàm C thực hiện hoán đổi tại chỗ.',
+    legv8_code: `// Ánh xạ: Địa chỉ cơ sở mảng A: X10, Chỉ số i: X19
+LSL   X11, X19, #3
+ADD   X11, X10, X11
+LDUR  X9,  [X11, #0]
+LDUR  X12, [X11, #8]
+STUR  X12, [X11, #0]
+STUR  X9,  [X11, #8]`,
+    desc: 'Đoạn mã nạp 2 phần tử liên tiếp từ mảng vào thanh ghi, sau đó ghi ngược lại vị trí của nhau. Hãy viết hàm C thực hiện hoán đổi tại chỗ.',
     function_signature: 'void swap_adjacent(long long A[], long long i)',
     starter_c_code: `void swap_adjacent(long long A[], long long i) {
     // Hoán đổi A[i] và A[i + 1]...
@@ -127,8 +127,8 @@ STUR  X9,  [X11, #8]   // A[i + 1] = X9`,
       }
     ],
     hints: [
-      'Tạo một biến tạm `long long temp = A[i];`',
-      'Gán `A[i] = A[i + 1];` và `A[i + 1] = temp;`.'
+      'Độ dời byte `[X11, #0]` tương ứng với `A[i]`, còn `[X11, #8]` tương ứng với phần tử liền kề `A[i + 1]`.',
+      'Trong C, cần một biến tạm thời để giữ giá trị trước khi ghi đè.'
     ]
   },
 
@@ -138,14 +138,14 @@ STUR  X9,  [X11, #8]   // A[i + 1] = X9`,
     title: 'Dịch Ngược Vòng Lặp While: Quét Mảng',
     time_limit: 300,
     base_score: 900,
-    legv8_code: `// save: X10, i: X19, k: X20
+    legv8_code: `// Ánh xạ: Con trỏ mảng save: X10, Chỉ số i: X19, Giá trị k: X20
 Loop:
     LSL   X11, X19, #3
     ADD   X11, X10, X11
-    LDUR  X12, [X11, #0]   // X12 = save[i]
-    SUBS  XZR, X12, X20    // so sánh save[i] với k
-    B.NE  Exit             // nếu save[i] != k -> thoát
-    ADDI  X19, X19, #1     // i = i + 1
+    LDUR  X12, [X11, #0]
+    SUBS  XZR, X12, X20
+    B.NE  Exit
+    ADDI  X19, X19, #1
     B     Loop
 Exit:`,
     desc: 'Xác định điều kiện tiếp tục vòng lặp và câu lệnh tăng biến đếm. Viết hàm C trả về chỉ số i sau khi vòng lặp dừng lại.',
@@ -167,8 +167,8 @@ Exit:`,
       { params: [[0, 0, 100, 50], 2, 100], expected: 3, label: 'Bộ kiểm thử #3' }
     ],
     hints: [
-      'Lệnh `B.NE Exit` thoát khi `save[i] != k`. Nghĩa là điều kiện vòng lặp chạy tiếp là `save[i] == k`!',
-      'Cấu trúc chuẩn: `while (save[i] == k) { i++; }`.'
+      'Lệnh `B.NE Exit` nhảy thoát ra ngoài khi phần tử không bằng k.',
+      'Như vậy, điều kiện để vòng lặp tiếp tục thực hiện bên trong là gì?'
     ]
   },
 
@@ -178,13 +178,13 @@ Exit:`,
     title: 'Dịch Ngược Rẽ Nhánh: Cấu Trúc If-Else',
     time_limit: 300,
     base_score: 950,
-    legv8_code: `// a: X19, b: X20, f: X9
-    SUBS  XZR, X19, X20    // a - b
-    B.LE  ElsePart         // nếu a <= b -> ElsePart
-    SUB   X9,  X19, X20    // f = a - b
+    legv8_code: `// Ánh xạ thanh ghi: a: X19, b: X20, f: X9
+    SUBS  XZR, X19, X20
+    B.LE  ElsePart
+    SUB   X9,  X19, X20
     B     EndIf
 ElsePart:
-    SUB   X9,  X20, X19    // f = b - a
+    SUB   X9,  X20, X19
 EndIf:`,
     desc: 'Phân tích điều kiện rẽ nhánh và hai khối lệnh tương ứng. Đây là thuật toán tính độ lệch tuyệt đối giữa a và b.',
     function_signature: 'long long abs_diff(long long a, long long b)',
@@ -205,8 +205,8 @@ EndIf:`,
       { params: [9, 9], expected: 0, label: 'Bộ kiểm thử #3' }
     ],
     hints: [
-      'Nếu `a <= b` nhảy sang ElsePart (f = b - a).',
-      'Ngược lại thì f = a - b. Tương đương: `if (a > b) return a - b; else return b - a;`'
+      'Phân tích điều kiện rẽ nhánh `B.LE`: nếu `a <= b` thì rẽ sang nhánh `ElsePart`.',
+      'Xác định biểu thức gán tương ứng trong mỗi nhánh điều kiện.'
     ]
   },
 
@@ -216,10 +216,11 @@ EndIf:`,
     title: 'Dịch Ngược Thủ Tục Lá: Tìm Số Lớn Hơn (max2)',
     time_limit: 300,
     base_score: 1100,
-    legv8_code: `max2:
-    SUBS  XZR, X0, X1      // so sánh a và b
-    B.GE  ReturnA          // nếu a >= b -> ReturnA
-    ADDI  X0,  X1, #0      // X0 = b
+    legv8_code: `// Ánh xạ: Tham số a: X0, Tham số b: X1. Giá trị trả về trong X0
+max2:
+    SUBS  XZR, X0,  X1
+    B.GE  ReturnA
+    ADDI  X0,  X1,  #0
 ReturnA:
     BR    LR`,
     desc: 'Hàm lá nhận 2 tham số trong X0 và X1, trả về số lớn hơn trong X0.',
@@ -241,7 +242,7 @@ ReturnA:
       { params: [88, 88], expected: 88, label: 'Bộ kiểm thử #3' }
     ],
     hints: [
-      'Nếu a >= b trả về a, ngược lại gán X0 = b và trả về b.'
+      'Lệnh `B.GE ReturnA` kiểm tra nếu `a >= b` thì nhảy đến nhãn trả về giá trị ban đầu trong X0.'
     ]
   },
 
@@ -251,16 +252,17 @@ ReturnA:
     title: 'Dịch Ngược Chuỗi Ký Tự: my_strlen',
     time_limit: 300,
     base_score: 1000,
-    legv8_code: `my_strlen:
-    ORR   X9, XZR, XZR     // X9 = 0 (len)
+    legv8_code: `// Ánh xạ: Con trỏ chuỗi s: X0. Giá trị trả về trong X0
+my_strlen:
+    ORR   X9,  XZR, XZR
 Loop_len:
-    ADD   X10, X0, X9      // X10 = s + len
-    LDURB X11, [X10, #0]   // nạp ký tự s[len] (1 byte)
-    CBZ   X11, Exit_len    // nếu s[len] == 0 ('\\0') -> thoát
-    ADDI  X9,  X9, #1      // len++
+    ADD   X10, X0,  X9
+    LDURB X11, [X10, #0]
+    CBZ   X11, Exit_len
+    ADDI  X9,  X9,  #1
     B     Loop_len
 Exit_len:
-    ORR   X0,  XZR, X9     // trả về len trong X0
+    ORR   X0,  XZR, X9
     BR    LR`,
     desc: 'Dịch ngược hàm duyệt chuỗi ký tự kết thúc bằng byte 0 (\\0) để tính chiều dài chuỗi.',
     function_signature: 'long long my_strlen(char *s)',
@@ -281,8 +283,8 @@ Exit_len:
       { params: ['Hello World!'], expected: 12, label: 'Bộ kiểm thử #3' }
     ],
     hints: [
-      'Khởi tạo biến đếm `long long len = 0;`',
-      'Dùng vòng lặp `while (s[len] != \'\\0\') { len++; } return len;`'
+      'Ký tự rỗng `\\0` có giá trị 0, lệnh `CBZ` kiểm tra điều kiện kết thúc chuỗi.',
+      'Dùng vòng lặp kiểm tra ký tự hiện tại khác `\\0`.'
     ]
   },
 
@@ -292,20 +294,21 @@ Exit_len:
     title: 'Dịch Ngược Vòng Lặp & Mảng: Tính Tổng Phần Tử',
     time_limit: 360,
     base_score: 1150,
-    legv8_code: `sum_array:
-    ADDI  X9,  XZR, #0     // sum = 0
-    ADDI  X10, XZR, #0     // i = 0
+    legv8_code: `// Ánh xạ: Con trỏ mảng A: X0, Kích thước n: X1. Giá trị trả về trong X0
+sum_array:
+    ADDI  X9,  XZR, #0
+    ADDI  X10, XZR, #0
 Loop:
-    SUBS  XZR, X10, X1     // so sánh i với n
-    B.GE  Exit             // nếu i >= n -> thoát
-    LSL   X11, X10, #3     // i * 8
-    ADD   X11, X0,  X11    // &A[i]
-    LDUR  X12, [X11, #0]   // A[i]
-    ADD   X9,  X9,  X12    // sum += A[i]
-    ADDI  X10, X10, #1     // i++
+    SUBS  XZR, X10, X1
+    B.GE  Exit
+    LSL   X11, X10, #3
+    ADD   X11, X0,  X11
+    LDUR  X12, [X11, #0]
+    ADD   X9,  X9,  X12
+    ADDI  X10, X10, #1
     B     Loop
 Exit:
-    ADDI  X0,  X9,  #0     // return sum
+    ADDI  X0,  X9,  #0
     BR    LR`,
     desc: 'Dịch ngược hàm tính tổng mảng 64-bit có kích thước n.',
     function_signature: 'long long sum_array(long long A[], long long n)',
@@ -326,7 +329,8 @@ Exit:
       { params: [[], 0], expected: 0, label: 'Bộ kiểm thử #3' }
     ],
     hints: [
-      'Vòng lặp `for (long long i = 0; i < n; i++) sum += A[i];`'
+      'X10 đóng vai trò biến đếm i, mỗi lần lặp tăng 1 cho đến khi `i >= n`.',
+      'X9 tích lũy tổng giá trị các phần tử đọc từ mảng.'
     ]
   },
 
@@ -336,27 +340,28 @@ Exit:
     title: 'Dịch Ngược Hàm Đệ Quy: fact(n)',
     time_limit: 480,
     base_score: 1500,
-    legv8_code: `fact:
-    SUBI  SP, SP, #16
-    STUR  X30, [SP, #8]    // lưu LR
-    STUR  X0,  [SP, #0]    // lưu n
+    legv8_code: `// Ánh xạ: Tham số n: X0. Giá trị trả về trong X0
+fact:
+    SUBI  SP,  SP,  #16
+    STUR  X30, [SP, #8]
+    STUR  X0,  [SP, #0]
 
-    SUBIS XZR, X0, #1      // n - 1
-    B.GE  L1               // nếu n >= 1 -> đệ quy
+    SUBIS XZR, X0,  #1
+    B.GE  L1
 
-    ADDI  X0, XZR, #1      // trường hợp cơ sở: return 1
-    ADDI  SP, SP, #16
+    ADDI  X0,  XZR, #1
+    ADDI  SP,  SP,  #16
     BR    LR
 
 L1:
-    SUBI  X0, X0, #1       // n - 1
-    BL    fact             // fact(n - 1)
+    SUBI  X0,  X0,  #1
+    BL    fact
 
-    LDUR  X1,  [SP, #0]    // phục hồi n
-    LDUR  X30, [SP, #8]    // phục hồi LR
-    ADDI  SP, SP, #16
+    LDUR  X1,  [SP, #0]
+    LDUR  X30, [SP, #8]
+    ADDI  SP,  SP,  #16
 
-    MUL   X0, X1, X0       // n * fact(n - 1)
+    MUL   X0,  X1,  X0
     BR    LR`,
     desc: 'Phân tích điểm dừng cơ sở và lời gọi đệ quy lồng nhau với quản lý ngăn xếp.',
     function_signature: 'long long fact(long long n)',
@@ -378,8 +383,8 @@ L1:
       { params: [6], expected: 720, label: 'Bộ kiểm thử #4' }
     ],
     hints: [
-      'Trường hợp dừng: `if (n < 1) return 1;`',
-      'Đệ quy: `return n * fact(n - 1);`'
+      'Phân tích điều kiện dừng cơ sở tại phép so sánh `SUBIS XZR, X0, #1`.',
+      'Lời gọi đệ quy lồng nhau được thực hiện thông qua lệnh `BL fact`.'
     ]
   },
 
@@ -389,38 +394,39 @@ L1:
     title: 'Dịch Ngược Đệ Quy Nhị Phân: fib(n)',
     time_limit: 600,
     base_score: 1800,
-    legv8_code: `fib:
-    SUBI  SP, SP, #32
+    legv8_code: `// Ánh xạ: Tham số n: X0. Giá trị trả về trong X0
+fib:
+    SUBI  SP,  SP,  #32
     STUR  X30, [SP, #16]
     STUR  X0,  [SP, #8]
 
-    SUBS  XZR, X0, XZR     // n <= 0 ?
+    SUBS  XZR, X0,  XZR
     B.GT  CheckOne
-    ADDI  X0,  XZR, #0     // return 0
-    ADDI  SP, SP, #32
+    ADDI  X0,  XZR, #0
+    ADDI  SP,  SP,  #32
     BR    LR
 
 CheckOne:
-    SUBIS XZR, X0, #1      // n == 1 ?
+    SUBIS XZR, X0,  #1
     B.NE  Recurse
-    ADDI  X0,  XZR, #1     // return 1
-    ADDI  SP, SP, #32
+    ADDI  X0,  XZR, #1
+    ADDI  SP,  SP,  #32
     BR    LR
 
 Recurse:
-    SUBI  X0,  X0, #1
-    BL    fib              // fib(n - 1)
+    SUBI  X0,  X0,  #1
+    BL    fib
     STUR  X0,  [SP, #0]
 
     LDUR  X0,  [SP, #8]
-    SUBI  X0,  X0, #2
-    BL    fib              // fib(n - 2)
+    SUBI  X0,  X0,  #2
+    BL    fib
 
     LDUR  X1,  [SP, #0]
-    ADD   X0,  X1, X0      // fib(n - 1) + fib(n - 2)
+    ADD   X0,  X1,  X0
 
     LDUR  X30, [SP, #16]
-    ADDI  SP, SP, #32
+    ADDI  SP,  SP,  #32
     BR    LR`,
     desc: 'Dịch ngược cấu trúc đệ quy 2 nhánh phân biệt tính số Fibonacci thứ n.',
     function_signature: 'long long fib(long long n)',
@@ -440,8 +446,8 @@ Recurse:
       { params: [6], expected: 8, label: 'Bộ kiểm thử #4' }
     ],
     hints: [
-      'Hai trường hợp cơ sở: `if (n <= 0) return 0;` và `if (n == 1) return 1;`',
-      'Lời gọi đệ quy: `return fib(n - 1) + fib(n - 2);`'
+      'Xác định 2 điều kiện cơ sở: khi n <= 0 và khi n == 1.',
+      'Cấu trúc đệ quy phân nhánh 2 lần gọi hàm và cộng dồn kết quả.'
     ]
   }
 ];
